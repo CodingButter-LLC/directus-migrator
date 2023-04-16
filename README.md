@@ -30,7 +30,7 @@ const config = [
   },
   {
     "name": "staging",
-       "endpoint": "<staging-url>",
+    "endpoint": "<staging-url>",
     "accessToken": "<staging_admin_token>"
   }
 ]
