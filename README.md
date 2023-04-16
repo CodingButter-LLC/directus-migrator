@@ -15,7 +15,7 @@ Directus Migrator is a utility for easily migrating directus schemas,roles and p
 
 ```npx directus-migrator -init```
 
-![directus-migrator -init](https://github.com/CodingButter-LLOC/directus-migrator/blob/main/images/init.jpg?raw=true)
+![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
 
 ### CLI
 
