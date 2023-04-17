@@ -16,8 +16,5 @@
   },
   "bin": {
     "directus-migrator": "./bin/index.cjs"
-  },
-  "devDependencies": {
-    "dumper.js": "^1.3.1"
   }
 }
