@@ -84,7 +84,7 @@ Supported options
 > npx directus-migrator -argument[=value]
 
 | Name | Type | Description | Implementation Status |
-| --- | --- | --- | --- |
+| :-: | :-: | :-: | :-: |
 | `init` | 'flag' | Initialize config file | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `force` | 'flag' |  Force migration between directus versions | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `source` | 'string'   | Environment to migrate from | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
