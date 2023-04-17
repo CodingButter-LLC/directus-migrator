@@ -140,16 +140,17 @@ const migratePermissions = async (mergedRoles) => {
   await directusMigrate.migrate(sourceConfig, targetConfig, mergedRoles, force)
 }
 ;(async () => {
+  let mergedRoles = []
   if (args.init) return init()
   if (args.add) return await addEnvironment()
   else {
     if (args.roles || args.permissions || args.schema) {
       if (args.schema) return await migrateSchema()
-      const mergedRoles = await migrateRoles()
+      mergedRoles = await migrateRoles()
       if (args.permissions) return await migratePermissions(mergedRoles)
     } else {
       await migrateSchema()
-      const mergedRoles = await migrateRoles()
+      mergedRoles = await migrateRoles()
       await migratePermissions(mergedRoles)
     }
   }

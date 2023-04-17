@@ -23,12 +23,22 @@ export const swapRoleIds = (permissions, mergedRoles) => {
 }
 
 export async function getPermissions(environment) {
-  const { data } = await get({ environment, path: "permissions" })
-  return data
+  const privatePerms = await get({ environment, path: "permissions", params: { limit: -1 } })
+  const publicPerms = await get({
+    environment,
+    path: "permissions",
+    params: { "filter[role][_null]": true, limit: -1 },
+  })
+  return [...privatePerms.data, ...publicPerms.data]
+}
+
+export function getNullRolePermissions(permissions) {
+  return permissions.filter((permission) => permission.role === null)
 }
 
 export async function removePermissions(environment, permissions) {
-  const ids = permIDS(permissions)
+  const ids = permIDS(permissions).filter((id) => id)
+  console.table(ids)
   const response = await remove({
     environment,
     path: "permissions",
@@ -38,33 +48,39 @@ export async function removePermissions(environment, permissions) {
         console.log(`Removed permissions`)
         return true
       } else {
-        console.log(`Failed to remove permissions`)
-        return false
+        throw new Error(JSON.stringify(await response.json(), null, 4))
       }
     },
   })
+  return response
 }
 
 export async function migrate(source, target, mergedRoles, force = false) {
   try {
+    console.log("merged roles")
+    console.table(mergedRoles)
     const targetPermissions = await getPermissions(target)
     const sourcePermissions = await getPermissions(source)
     if (sourcePermissions.length) {
       const newPermissions = swapRoleIds(sourcePermissions, mergedRoles)
+      console.log("New Permissions")
+      console.table(newPermissions)
+      const nullRolePermissions = sanitizePermissions(getNullRolePermissions(sourcePermissions))
+      console.log("Null Role Permissions")
+      console.table(nullRolePermissions)
+      await removePermissions(target, targetPermissions)
       const response = await create({
         environment: target,
         path: "permissions",
-        bodyData: newPermissions,
+        bodyData: [...newPermissions, ...nullRolePermissions],
         handleResponse: async (response) => {
           if (response.ok) {
             console.log(`Created permissions`)
-            if (force) {
-              await removePermissions(source, sourcePermissions)
-            }
             return true
           } else {
-            console.log(`Failed to create permissions`)
-            return false
+            throw new Error("Error Creating Permissions", {
+              cause: JSON.stringify(await response.json(), null, 4),
+            })
           }
         },
       })
