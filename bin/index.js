@@ -130,7 +130,19 @@ const migrateRoles = async () => {
     const { source, target } = args
     const force = args?.force
     const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-    await directusMigrate.roleMigrate(sourceConfig, targetConfig, force)
+    await directusMigrate.migrate(sourceConfig, targetConfig, force)
+  } catch (e) {
+    console.log({ e })
+  }
+}
+
+const migratePermissions = async () => {
+  const directusMigrate = await import("../src/permission-migration.mjs")
+  try {
+    const { source, target } = args
+    const force = args?.force
+    const [sourceConfig, targetConfig] = await getEnvironments(source, target)
+    await directusMigrate.migrate(sourceConfig, targetConfig, force)
   } catch (e) {
     console.log({ e })
   }
@@ -140,8 +152,11 @@ if (args.init) {
   init()
 } else if (args.add) {
   addEnvironment()
-} else if (args.roles) {
-  migrateRoles()
+} else if (args.roles || args.permissions) {
+  ;(async () => {
+    if (args.roles) await migrateRoles()
+    if (args.permissions) await migratePermissions()
+  })()
 } else {
   migrateSchema()
 }

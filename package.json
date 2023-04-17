@@ -1,6 +1,6 @@
 {
   "name": "directus-migrator",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "main": "./src/schema-migration.mjs",
   "license": "MIT",
   "dependencies": {
