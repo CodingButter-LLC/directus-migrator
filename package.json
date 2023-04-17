@@ -1,7 +1,8 @@
 {
   "name": "directus-migrator",
-  "version": "1.2.3",
+  "version": "1.2.5",
   "main": "./src/schema-migration.mjs",
+  "type":"module",
   "license": "MIT",
   "homepage":"https://github.com/CodingButter-LLC/directus-migrator",
   "repository":{  
@@ -14,6 +15,6 @@
     "prompts": "^2.4.2"
   },
   "bin": {
-    "directus-migrator": "./bin/index.js"
+    "directus-migrator": "./bin/index.cjs"
   }
 }

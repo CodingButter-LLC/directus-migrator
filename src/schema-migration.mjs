@@ -2,7 +2,7 @@ import path from "path"
 
 let configArray
 
-export const config = async (config = { path: "directus-migrator.config.mjs" }) => {
+export const config = async (config = { path: "directus-migrator.config.js" }) => {
   const configPath = `${path.join(process.cwd(), config.path)}`
   if (!configArray) {
     const config = await import(`${configPath}`)

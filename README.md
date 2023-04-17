@@ -39,7 +39,7 @@ $ npx directus-migrate -init
 
 ![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
 
-### directus-migrator.config.mjs
+### directus-migrator.config.js
 
 example
 
