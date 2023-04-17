@@ -1,6 +1,6 @@
 import path from "path"
 import { create, get, update, remove } from "./utils/CRUD.mjs"
-
+import logger from "./utils/Logger.mjs"
 let configArray
 
 export const config = async (config = { path: "directus-migrator.config.mjs" }) => {
@@ -12,9 +12,9 @@ export const config = async (config = { path: "directus-migrator.config.mjs" }) 
   return configArray
 }
 
-export async function migrate(source, target, force = false) {
+export async function migrate(args, source, target, force = false) {
   //check if source is a string
-
+  logger.setDebugLevel(args)
   try {
     const snapshot = await getSnapshot(source)
     const diff = await getDiff(target, snapshot, force)
@@ -23,7 +23,7 @@ export async function migrate(source, target, force = false) {
     if (!applied) return { status: "failed" }
     return { status: "success" }
   } catch (err) {
-    console.error("Migration Failed: Are you sure there are changes to be made?", err)
+    logger.error("Migration Failed: Are you sure there are changes to be made?", err)
   }
 }
 
@@ -40,11 +40,11 @@ export async function getDiff(environment, snapshot, force) {
     bodyData: snapshot,
     handleResponse: async (response) => {
       if (response.ok) {
-        console.log("Migration Diff Successful")
+        logger.log("Migration Diff Successful")
         const jsonResponse = await response.json()
         return jsonResponse.data
       } else {
-        console.warn("Migration Diff Failed")
+        logger.warn("Migration Diff Failed")
         return false
       }
     },
@@ -58,10 +58,10 @@ export async function applyDiff(environment, diff) {
     bodyData: diff,
     handleResponse: async (response) => {
       if (response.ok) {
-        console.log("Migration Successful")
+        logger.log("Migration Successful")
         return true
       } else {
-        console.log("Migration Failed", JSON.stringify(await response.json(), null, 4))
+        logger.log("Migration Failed", JSON.stringify(await response.json(), null, 4))
         return false
       }
     },

@@ -1,5 +1,5 @@
 import { create, get, update, remove } from "./utils/CRUD.mjs"
-
+import logger from "./utils/Logger.mjs"
 /**
  *
  * @param {Array} roles
@@ -51,6 +51,7 @@ export async function createRoles(environment, roles) {
         throw new Error(`Failed to create roles`)
       }
       const jsonResponse = await response.json()
+      logger.log("Created Roles", jsonResponse.data)
       if (jsonResponse.data) return jsonResponse.data
       return jsonResponse
     },
@@ -60,11 +61,13 @@ export async function createRoles(environment, roles) {
 
 export async function getRoles(environment) {
   const { data } = await get({ environment, path: "roles" })
+  logger.info("Retrieved Roles", JSON.stringify(data, null, 4))
   return data
 }
 
-export async function migrate(source, target, force = false) {
+export async function migrate(args, source, target, force = false) {
   try {
+    logger.setDebugLevel(args)
     let mergedRoles = []
     const { existingRoles, newRoles } = await parseRoles(source, target)
     mergedRoles = [...existingRoles]
@@ -72,8 +75,9 @@ export async function migrate(source, target, force = false) {
       const createdRoles = await createRoles(target, sanitizeRoles(newRoles))
       mergedRoles = [...mergedRoles, ...mergeRoles(newRoles, createdRoles)]
     }
+    logger.info("Merged Roles", mergedRoles)
     return mergedRoles
   } catch (err) {
-    console.log("Error Migrating Roles", err)
+    logger.error("Error Migrating Roles", err)
   }
 }

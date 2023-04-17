@@ -1,6 +1,6 @@
 {
   "name": "directus-migrator",
-  "version": "1.3.2",
+  "version": "1.3.4",
   "main": "./src/schema-migration.mjs",
   "type": "module",
   "license": "MIT",
@@ -16,5 +16,8 @@
   },
   "bin": {
     "directus-migrator": "./bin/index.cjs"
+  },
+  "devDependencies": {
+    "dumper.js": "^1.3.1"
   }
 }

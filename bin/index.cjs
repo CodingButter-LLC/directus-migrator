@@ -61,7 +61,7 @@ const addEnvironment = async () => {
     `const config = ${JSON.stringify(currentConfig, null, 2)}
  export default config`
   )
-  console.log("Config updated!")
+  logger.log("Config updated!")
   await addEnvQuestion()
 }
 
@@ -118,9 +118,9 @@ const migrateSchema = async () => {
     const force = args?.force
 
     const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-    await directusMigrate.migrate(sourceConfig, targetConfig, force)
+    await directusMigrate.migrate(args, sourceConfig, targetConfig, force)
   } catch (e) {
-    console.log({ e })
+    logger.error("Error while migrating schema", { error: e })
   }
 }
 
@@ -129,7 +129,7 @@ const migrateRoles = async () => {
   const { source, target } = args
   const force = args?.force
   const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-  return await directusMigrate.migrate(sourceConfig, targetConfig, force)
+  return await directusMigrate.migrate(args, sourceConfig, targetConfig, force)
 }
 
 const migratePermissions = async (mergedRoles) => {
@@ -137,7 +137,7 @@ const migratePermissions = async (mergedRoles) => {
   const { source, target } = args
   const force = args?.force
   const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-  await directusMigrate.migrate(sourceConfig, targetConfig, mergedRoles, force)
+  await directusMigrate.migrate(args, sourceConfig, targetConfig, mergedRoles, force)
 }
 ;(async () => {
   let mergedRoles = []
@@ -154,4 +154,5 @@ const migratePermissions = async (mergedRoles) => {
       await migratePermissions(mergedRoles)
     }
   }
+  console.log("Completed!")
 })()

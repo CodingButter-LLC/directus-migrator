@@ -1,5 +1,5 @@
 import { create, get, update, remove } from "./utils/CRUD.mjs"
-
+import logger from "./utils/Logger.mjs"
 const permIDS = (permissions) => permissions.map(({ id }) => id)
 const sanitizePermissions = (permissions) => {
   return permissions.map((permission) => {
@@ -38,36 +38,31 @@ export function getNullRolePermissions(permissions) {
 
 export async function removePermissions(environment, permissions) {
   const ids = permIDS(permissions).filter((id) => id)
-  console.table(ids)
+  logger.table(ids)
   const response = await remove({
     environment,
     path: "permissions",
     bodyData: ids,
     handleResponse: async (response) => {
       if (response.ok) {
-        console.log(`Removed permissions`)
+        logger.log(`Removed permissions`)
         return true
       } else {
-        throw new Error(JSON.stringify(await response.json(), null, 4))
+        logger.error(JSON.stringify(await response.json(), null, 4))
       }
     },
   })
   return response
 }
 
-export async function migrate(source, target, mergedRoles, force = false) {
+export async function migrate(args, source, target, mergedRoles, force = false) {
   try {
-    console.log("merged roles")
-    console.table(mergedRoles)
+    logger.setDebugLevel(args)
     const targetPermissions = await getPermissions(target)
     const sourcePermissions = await getPermissions(source)
     if (sourcePermissions.length) {
       const newPermissions = swapRoleIds(sourcePermissions, mergedRoles)
-      console.log("New Permissions")
-      console.table(newPermissions)
       const nullRolePermissions = sanitizePermissions(getNullRolePermissions(sourcePermissions))
-      console.log("Null Role Permissions")
-      console.table(nullRolePermissions)
       await removePermissions(target, targetPermissions)
       const response = await create({
         environment: target,
@@ -75,17 +70,18 @@ export async function migrate(source, target, mergedRoles, force = false) {
         bodyData: [...newPermissions, ...nullRolePermissions],
         handleResponse: async (response) => {
           if (response.ok) {
-            console.log(`Created permissions`)
+            logger.log(`Created permissions`, JSON.stringify(await response.json(), null, 4))
             return true
           } else {
-            throw new Error("Error Creating Permissions", {
-              cause: JSON.stringify(await response.json(), null, 4),
-            })
+            logger.error(
+              "Error Creating Permissions",
+              JSON.stringify(await response.json(), null, 4)
+            )
           }
         },
       })
     }
   } catch (err) {
-    console.log("Migration Failed: Are you sure there are changes to be made?", err)
+    logger.error("Migration Failed: Are you sure there are changes to be made?", err)
   }
 }

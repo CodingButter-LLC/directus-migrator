@@ -15,6 +15,7 @@
 
 - [Directus Migrator](#directus-migrator)
   - [Table of contents](#table-of-contents)
+  - [Warning](#warning)
   - [Getting Started](#getting-started)
   - [Initilization](#initilization)
   - [Usage](#usage)
@@ -24,6 +25,10 @@
     - [Options](#options)
   - [Authors](#authors)
   - [License](#license)
+
+## Warning
+
+> As of right now directus-migrator does not migrate from sqlite to postgress
 
 ## Getting Started
 
@@ -92,6 +97,8 @@ Supported options
 | `schema` | 'flag' | Only migrates schema [ can be combined with permissions and roles] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]| ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `debug` | 'flag' | display console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `permissions` | 'flag' | display detailed console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 ## Authors
 
