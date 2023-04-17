@@ -79,19 +79,18 @@ $ npx directus-migrator -force -source=development -target=staging
 
 Supported options 
 
-#### Options
+### Options
 
 > npx directus-migrator -argument[=value]
 
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `init` | 'flag' | Initialize config file |
-| `force` | 'flag' |  Force migration between directus versions |
-| `source` | 'string'   | Environment to migrate from |
-| `target` | 'string'   | Environment to migrate to |
-| `roles` | 'flag' | Only migrates roles [ can be combined with permissions ] |
-| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles ]|
+| Name | Type | Description | Implementation Status |
+| --- | --- | --- | --- |
+| `init` | 'flag' | Initialize config file | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `force` | 'flag' |  Force migration between directus versions | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `source` | 'string'   | Environment to migrate from | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `target` | 'string'   | Environment to migrate to | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `roles` | 'flag' | Only migrates roles [ can be combined with permissions ] | ![](https://geps.dev/progress/25?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles ]| ![](https://geps.dev/progress/25?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 ## Authors
 
@@ -101,4 +100,4 @@ See also the list of [contributors](https://github.com/CodingButter-LLC/directus
 
 ## License
 
-[MIT License](https://andreasonny.mit-license.org/2019) © Andrea SonnY
+[MIT License](https://andreasonny.mit-license.org/2019) © CodingButter
