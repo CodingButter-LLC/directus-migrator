@@ -1,28 +1,47 @@
+[![npm version](https://badge.fury.io/js/angular2-expandable-list.svg)](https://badge.fury.io/js/angular2-expandable-list)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-<h1 align="center" style="padding:2px">
-        <a href="https://github.com/CodingButter-LLC/directus-migrator"><img width="50%" src="https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/logo.png" /></a><br>
+<h1 align="center">
+   <b>
+        <a href="https://www.npmjs.com/package/directus-migrator"><img style="width:50%;"src="https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/logo.png" /></a><br>
+    </b>
 </h1>
+
 # Directus Migrator
 
-Directus Migrator is a utility for easily migrating directus schemas,roles and permissions from one environment to another (eg. development->staging)
+> A Command-Line tool to simply migrate Directus Schemas,Roles and Permissions between different environments within your project
 
-## Installation
+## Table of contents
 
-```npm i directus-migrator```
+- [Directus Migrator](#directus-migrator)
+  - [Table of contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+  - [Initilization](#initilization)
+  - [Usage](#usage)
+    - [Basic](#basic)
+    - [Force Migration](#force-migration)
+  - [API](#api)
+    - [Options](#options)
+  - [Authors](#authors)
+  - [License](#license)
 
-```yarn add directus-migrator```
+## Getting Started
 
-```pnpm i directus-migrator```
+These instructions will explain how to use the basic directus-migrator command and which arguments are required
 
-## Initializing Config
+## Initilization
 
-```npx directus-migrator -init```
+No installation neccessary. just run the following command from within the project root
+
+```sh
+$ npx directus-migrate -init
+```
 
 ![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
 
 ### directus-migrator.config.mjs
 
-Example
+example
 
 ```js
 const config = [
@@ -33,19 +52,53 @@ const config = [
   },
   {
     "name": "staging",
-    "endpoint": "<staging-url>",
+       "endpoint": "<staging-url>",
     "accessToken": "<staging_admin_token>"
   }
 ]
 export default config 
 ```
 
-### CLI
+## Usage
 
-```npx directus-migrator -source=development -target=staging```
+### Basic
+
+```sh
+$ npx directus-migrator -source=development -target=staging
+```
+
+### Force Migration
+
+> If your environments are not on the exact same version of directus you may need to force the migration with the -force flag
+
+```sh
+$ npx directus-migrator -force -source=development -target=staging
+```
 
 ## API
 
-### cli arguments
+Supported options 
+
+#### Options
+
+> npx directus-migrate -argument[=value]
 
 
+| Name | Type | Description |
+| --- | --- | --- |
+| `init` | 'flag' | Initialize config file |
+| `force` | 'flag' |  Force migration between directus versions |
+| `source` | 'string'   | Environment to migrate from |
+| `target` | 'string'   | Environment to migrate to |
+| `roles` | 'flag' | Only migrates roles [ can be combined with permissions ] |
+| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles ]|
+
+## Authors
+
+**CodingButter** - *Initial work* - [CodingButter](https://github.com/CodingButter-LLC)
+
+See also the list of [contributors](https://github.com/CodingButter-LLC/directus-migrator/contributors) who participated in this project.
+
+## License
+
+[MIT License](https://andreasonny.mit-license.org/2019) © Andrea SonnY
