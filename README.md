@@ -1,4 +1,7 @@
 
+<h1 align="center" style="background:white;padding:2px">
+        <a href="https://github.com/CodingButter-LLC/directus-migrator"><img style="background:white" src="https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/logo.png" /></a><br>
+</h1>
 # Directus Migrator
 
 Directus Migrator is a utility for easily migrating directus schemas,roles and permissions from one environment to another (eg. development->staging)
@@ -40,3 +43,9 @@ export default config
 ### CLI
 
 ```npx directus-migrator -source=development -target=staging```
+
+## API
+
+### cli arguments
+
+
