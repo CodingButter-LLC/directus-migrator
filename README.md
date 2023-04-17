@@ -81,7 +81,7 @@ Supported options
 
 #### Options
 
-> npx directus-migrate -argument[=value]
+> npx directus-migrator -argument[=value]
 
 
 | Name | Type | Description |
