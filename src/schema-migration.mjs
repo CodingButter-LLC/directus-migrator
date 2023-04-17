@@ -61,7 +61,7 @@ export async function applyDiff(environment, diff) {
         console.log("Migration Successful")
         return true
       } else {
-        console("Migration Failed", JSON.stringify(await response.json(), null, 4))
+        console.log("Migration Failed", JSON.stringify(await response.json(), null, 4))
         return false
       }
     },
