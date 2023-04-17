@@ -1,8 +1,9 @@
 import path from "path"
+import { create, get, update, remove } from "./utils/CRUD.mjs"
 
 let configArray
 
-export const config = async (config = { path: "directus-migrator.config.js" }) => {
+export const config = async (config = { path: "directus-migrator.config.mjs" }) => {
   const configPath = `${path.join(process.cwd(), config.path)}`
   if (!configArray) {
     const config = await import(`${configPath}`)
@@ -11,15 +12,9 @@ export const config = async (config = { path: "directus-migrator.config.js" }) =
   return configArray
 }
 
-export async function schemaMigrate(source, target, force = false) {
+export async function migrate(source, target, force = false) {
   //check if source is a string
-  if (typeof source === "string") {
-    await config()
-    if (!configArray) throw new Error("Config not found")
-    source = configArray.find((config) => config.name === source)
-    target = configArray.find((config) => config.name === target)
-    if (!source || !target) throw new Error("Source or target not found in config")
-  }
+
   try {
     const snapshot = await getSnapshot(source)
     const diff = await getDiff(target, snapshot, force)
@@ -32,45 +27,43 @@ export async function schemaMigrate(source, target, force = false) {
   }
 }
 
-export async function getSnapshot({ endpoint, accessToken }) {
-  const URL = `${endpoint}/schema/snapshot?access_token=${accessToken}`
-  const { data } = await fetch(URL).then((r) => r.json())
+export async function getSnapshot(environment) {
+  const { data } = await get({ environment, path: "schema/snapshot" })
   return data
 }
 
-export async function getDiff({ endpoint, accessToken }, snapshot, force) {
-  const URL = `${endpoint}/schema/diff?access_token=${accessToken}${force ? "&force=true" : ""}}`
-  const response = await fetch(URL, {
-    method: "POST",
-    body: JSON.stringify(snapshot),
-    headers: {
-      "Content-Type": "application/json",
+export async function getDiff(environment, snapshot, force) {
+  return await create({
+    environment,
+    path: "schema/diff",
+    params: { force },
+    bodyData: snapshot,
+    handleResponse: async (response) => {
+      if (response.ok) {
+        console.log("Migration Diff Successful")
+        const jsonResponse = await response.json()
+        return jsonResponse.data
+      } else {
+        console.warn("Migration Diff Failed")
+        return false
+      }
     },
   })
-  if (response.ok) {
-    console.log("Migration Diff Successful")
-    const jsonResponse = await response.json()
-    return jsonResponse.data
-  } else {
-    console.warn("Migration Diff Failed")
-    return false
-  }
 }
 
-export async function applyDiff({ endpoint, accessToken }, diff) {
-  const URL = `${endpoint}/schema/apply?access_token=${accessToken}`
-  const response = await fetch(URL, {
-    method: "POST",
-    body: JSON.stringify(diff),
-    headers: {
-      "Content-Type": "application/json",
+export async function applyDiff(environment, diff) {
+  return await create({
+    environment,
+    path: "schema/apply",
+    bodyData: diff,
+    handleResponse: async (response) => {
+      if (response.ok) {
+        console.log("Migration Successful")
+        return true
+      } else {
+        console.warn("Migration Failed")
+        return false
+      }
     },
   })
-  if (response.ok) {
-    console.log("Migration Successful")
-    return true
-  } else {
-    console.warn("Migration Failed")
-    return false
-  }
 }

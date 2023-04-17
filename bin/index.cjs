@@ -4,7 +4,7 @@ const path = require("path")
 const args = require("args-parser")(process.argv)
 const prompts = require("prompts")
 
-const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
+const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.mjs")
 let currentConfig
 const addEnvironment = async () => {
   if (!currentConfig) {
@@ -85,7 +85,7 @@ const init = async () => {
     const overwriteConfig = await prompts({
       type: "confirm",
       name: "value",
-      message: "directus-migrator.config.js already exists. Do you want to overwrite it?",
+      message: "directus-migrator.config.mjs already exists. Do you want to overwrite it?",
       initial: false,
     })
     if (!overwriteConfig.value) {
@@ -103,7 +103,7 @@ export default config`
 
 const getEnvironments = async (sourceName, targetName) => {
   const config = args?.config
-  const configPath = path.resolve(process.cwd(), config || "directus-migrator.config.js")
+  const configPath = path.resolve(process.cwd(), config || "directus-migrator.config.mjs")
   const configModule = await import(`file://${configPath}`)
   const configArray = configModule.default
   const sourceConfig = configArray.find((config) => config.name === sourceName)
@@ -118,7 +118,7 @@ const migrateSchema = async () => {
     const force = args?.force
 
     const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-    await directusMigrate.schemaMigrate(sourceConfig, targetConfig, force)
+    await directusMigrate.migrate(sourceConfig, targetConfig, force)
   } catch (e) {
     console.log({ e })
   }
@@ -126,37 +126,31 @@ const migrateSchema = async () => {
 
 const migrateRoles = async () => {
   const directusMigrate = await import("../src/role-migration.mjs")
-  try {
-    const { source, target } = args
-    const force = args?.force
-    const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-    await directusMigrate.migrate(sourceConfig, targetConfig, force)
-  } catch (e) {
-    console.log({ e })
-  }
+  const { source, target } = args
+  const force = args?.force
+  const [sourceConfig, targetConfig] = await getEnvironments(source, target)
+  return await directusMigrate.migrate(sourceConfig, targetConfig, force)
 }
 
-const migratePermissions = async () => {
-  const directusMigrate = await import("../src/permission-migration.js")
-  try {
-    const { source, target } = args
-    const force = args?.force
-    const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-    await directusMigrate.migrate(sourceConfig, targetConfig, force)
-  } catch (e) {
-    console.log({ e })
+const migratePermissions = async (mergedRoles) => {
+  const directusMigrate = await import("../src/permission-migration.mjs")
+  const { source, target } = args
+  const force = args?.force
+  const [sourceConfig, targetConfig] = await getEnvironments(source, target)
+  await directusMigrate.migrate(sourceConfig, targetConfig, mergedRoles, force)
+}
+;(async () => {
+  if (args.init) return init()
+  if (args.add) return await addEnvironment()
+  else {
+    if (args.roles || args.permissions || args.schema) {
+      if (args.schema) return await migrateSchema()
+      const mergedRoles = await migrateRoles()
+      if (args.permissions) return await migratePermissions(mergedRoles)
+    } else {
+      await migrateSchema()
+      const mergedRoles = await migrateRoles()
+      await migratePermissions(mergedRoles)
+    }
   }
-}
-
-if (args.init) {
-  init()
-} else if (args.add) {
-  addEnvironment()
-} else if (args.roles || args.permissions) {
-  ;(async () => {
-    if (args.roles) await migrateRoles()
-    if (args.permissions) await migratePermissions()
-  })()
-} else {
-  migrateSchema()
-}
+})()

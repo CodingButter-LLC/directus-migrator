@@ -39,7 +39,7 @@ $ npx directus-migrate -init
 
 ![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
 
-### directus-migrator.config.js
+### directus-migrator.config.mjs
 
 example
 
@@ -89,8 +89,9 @@ Supported options
 | `force` | 'flag' |  Force migration between directus versions | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `source` | 'string'   | Environment to migrate from | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `target` | 'string'   | Environment to migrate to | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `roles` | 'flag' | Only migrates roles [ can be combined with permissions ] | ![](https://geps.dev/progress/25?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles ]| ![](https://geps.dev/progress/25?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `schema` | 'flag' | Only migrates schema [ can be combined with permissions and roles] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]| ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 ## Authors
 
