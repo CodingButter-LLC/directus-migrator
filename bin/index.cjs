@@ -4,6 +4,8 @@ const path = require("path")
 const args = require("args-parser")(process.argv)
 const prompts = require("prompts")
 
+let logger
+
 const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.mjs")
 let currentConfig
 const addEnvironment = async () => {
@@ -140,6 +142,9 @@ const migratePermissions = async (mergedRoles) => {
   await directusMigrate.migrate(args, sourceConfig, targetConfig, mergedRoles, force)
 }
 ;(async () => {
+  logImport = await import("../src/utils/Logger.mjs")
+  logger = logImport.default
+  logger.setDebugLevel(args)
   let mergedRoles = []
   if (args.init) return init()
   if (args.add) return await addEnvironment()
