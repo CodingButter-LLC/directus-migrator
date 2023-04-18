@@ -9,7 +9,7 @@ import logger from "./utils/Logger.mjs"
 export const sanitizeRoles = (roles) => {
   return roles.map((role) => {
     const sanitizedRole = { ...role }
-    delete sanitizedRole.id
+    //delete sanitizedRole.id
     delete sanitizedRole.users
     return sanitizedRole
   })
@@ -75,7 +75,8 @@ export async function migrate(args, source, target, force = false) {
       const createdRoles = await createRoles(target, sanitizeRoles(newRoles))
       mergedRoles = [...mergedRoles, ...mergeRoles(newRoles, createdRoles)]
     }
-    logger.info("Merged Roles", mergedRoles)
+    logger.info("Merged Roles")
+    logger.table(mergedRoles)
     return mergedRoles
   } catch (err) {
     logger.error("Error Migrating Roles", err)

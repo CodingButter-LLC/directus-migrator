@@ -25,7 +25,7 @@ const info = (message, ...extra) => {
   detail(console.info, message, ...extra)
 }
 const table = (message) => {
-  if (DEBUG_LEVEL === "verbose") detail(console.table, message)
+  if (DEBUG_LEVEL === "verbose") console.table(message)
 }
 
 export default {
