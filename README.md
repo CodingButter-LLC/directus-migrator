@@ -39,7 +39,7 @@ These instructions will explain how to use the basic directus-migrator command a
 No installation neccessary. just run the following command from within the project root
 
 ```sh
-$ npx directus-migrate -init
+$ npx directus-migrator -init
 ```
 
 ![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
