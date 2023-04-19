@@ -114,7 +114,7 @@ const getEnvironments = async (sourceName, targetName) => {
 }
 
 const migrateSchema = async () => {
-  const directusMigrate = await import("../src/schema-migration.mjs")
+  const directusMigrate = await import("./schema-migration.js")
   try {
     const { source, target } = args
     const force = args?.force
@@ -127,7 +127,7 @@ const migrateSchema = async () => {
 }
 
 const migrateRoles = async () => {
-  const directusMigrate = await import("../src/role-migration.mjs")
+  const directusMigrate = await import("./role-migration.js")
   const { source, target } = args
   const force = args?.force
   const [sourceConfig, targetConfig] = await getEnvironments(source, target)
@@ -135,14 +135,14 @@ const migrateRoles = async () => {
 }
 
 const migratePermissions = async (mergedRoles) => {
-  const directusMigrate = await import("../src/permission-migration.mjs")
+  const directusMigrate = await import("./permission-migration.js")
   const { source, target } = args
   const force = args?.force
   const [sourceConfig, targetConfig] = await getEnvironments(source, target)
   await directusMigrate.migrate(args, sourceConfig, targetConfig, mergedRoles, force)
 }
 ;(async () => {
-  logImport = await import("../src/utils/Logger.mjs")
+  logImport = await import("./utils/Logger.js")
   logger = logImport.default
   logger.setDebugLevel(args)
   let mergedRoles = []

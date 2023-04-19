@@ -1,6 +1,6 @@
 import path from "path"
-import { create, get, update, remove } from "./utils/CRUD.mjs"
-import logger from "./utils/Logger.mjs"
+import { create, get, update, remove } from "./utils/CRUD.js"
+import logger from "./utils/Logger.js"
 let configArray
 
 export const config = async (config = { path: "directus-migrator.config.mjs" }) => {
