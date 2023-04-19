@@ -91,6 +91,7 @@ Supported options
 | Name | Type | Description | Implementation Status |
 | :-: | :-: | :-: | :-: |
 | `init` | 'flag' | Initialize config file | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `add` | 'flag' | Prompts for to add a Environment to existing config | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `force` | 'flag' |  Force migration between directus versions | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `source` | 'string'   | Environment to migrate from | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `target` | 'string'   | Environment to migrate to | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
@@ -98,7 +99,7 @@ Supported options
 | `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]| ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 | `debug` | 'flag' | display console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `permissions` | 'flag' | display detailed console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `verbose` | 'flag' | display detailed console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 ## Authors
 
