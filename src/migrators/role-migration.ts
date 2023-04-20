@@ -1,9 +1,9 @@
 import { Environment, Role, AdminIds } from "../types/types"
-import { create, get, remove, CRUD } from "../utils/CRUD"
+import CRUD, { Method } from "../utils/CRUD"
 import logger from "../utils/Logger"
 
 export interface RoleExecution {
-  action: (crud: CRUD) => Promise<any>
+  method: Method
   environment: Environment
   roles?: Partial<Role[]> | Partial<Role>
   id?: string
@@ -17,8 +17,7 @@ export function removeAdmin(roles: Role[]): [roles: Role[], adminId: string] {
 }
 
 export async function getRoles(environment: Environment) {
-  const crudData: CRUD = { environment, path: "roles" }
-  const { data }: { data: Role[] } = await get(crudData)
+  const { data }: { data: Role[] } = await CRUD({ method: Method.GET, environment, path: "roles" })
   logger.info("Retrieved Roles", JSON.stringify(data, null, 4))
   return data
 }
@@ -47,40 +46,36 @@ export async function getRoleCategories(
   )
   return { createdRoles, deletedRoles, adminIds }
 }
-
-export async function executeRoleAction({
-  action,
+async function executeRoleAction({
+  method,
   environment,
   roles,
   id,
   successMessage,
   failMessage,
 }: RoleExecution) {
-  const roleResponse = await action({
+  logger.log("", `Executing ${method} on ${environment.name}...`)
+  const roleResponse = await CRUD({
+    method,
     environment,
-    path: `roles${id ? `/${id}` : ""}`,
-    bodyData: roles,
-    handleResponse: async (response: Response) => {
-      if (!response.ok) {
-        failMessage && logger.error(failMessage)
-        logger.log(await response.text())
-        return null
-      } else {
-        const jsonResponse = await response.json()
-        successMessage && logger.log(successMessage, jsonResponse.data)
-        if (jsonResponse.data) return jsonResponse.data
-        return []
-      }
+    path: `permissions${id ? `/${id}` : ""}`,
+    data: roles,
+    success: async (response: Response) => {
+      const jsonResponse = await response.json()
+      successMessage && logger.log(successMessage(jsonResponse.data))
+    },
+    failure: async (response: Response) => {
+      const jsonString = await response.json()
+      failMessage && logger.error(failMessage(jsonString))
     },
   })
   return roleResponse
 }
-
 export async function migrate(source: Environment, target: Environment): Promise<AdminIds> {
   const { createdRoles, deletedRoles, adminIds } = await getRoleCategories(source, target)
   if (createdRoles.length > 0) {
     await executeRoleAction({
-      action: create,
+      method: Method.POST,
       roles: createdRoles,
       environment: target,
       successMessage: (roles: any) => `Created ${roles.length} Role/s`,
@@ -93,7 +88,7 @@ export async function migrate(source: Environment, target: Environment): Promise
       deletedRoles.map((role) => {
         const { id } = role
         executeRoleAction({
-          action: remove,
+          method: Method.DELETE,
           environment: target,
           id,
           successMessage: (roles: any) => `Deleted ${roles.length} Role/s`,

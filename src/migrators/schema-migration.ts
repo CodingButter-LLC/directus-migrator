@@ -1,6 +1,6 @@
-import { create, get } from "../utils/CRUD.js"
-import logger from "../utils/Logger.js"
-import { Environment } from "../types/types.js"
+import CRUD, { Method } from "../utils/CRUD"
+import logger from "../utils/Logger"
+import { Environment } from "../types/types"
 
 export async function migrate(
   source: Environment,
@@ -20,7 +20,20 @@ export async function migrate(
 }
 
 export async function getSnapshot(environment: Environment) {
-  const { data } = await get({ environment, path: "schema/snapshot" })
+  const { data } = await CRUD({
+    method: Method.GET,
+    environment,
+    path: "schema/snapshot",
+    success: async (response: Response) => {
+      logger.log("Schema Migration Snapshot Successful")
+    },
+    failure: async (response: Response) => {
+      logger.warn(
+        "Schema Migration Snapshot Failed",
+        JSON.stringify(await response?.json(), null, 4)
+      )
+    },
+  })
   return data
 }
 
@@ -29,37 +42,32 @@ export async function getDiff(
   snapshot: any,
   force?: boolean | undefined
 ) {
-  return await create({
+  return await CRUD({
+    method: Method.POST,
     environment,
     path: "schema/diff",
     params: { force },
-    bodyData: snapshot,
-    handleResponse: async (response: Response) => {
-      if (response.ok) {
-        logger.log("Migration Diff Successful")
-        const jsonResponse = await response.json()
-        return jsonResponse.data
-      } else {
-        logger.warn("Migration Diff Failed")
-        return false
-      }
+    data: snapshot,
+    success: async (response: Response) => {
+      logger.log("Migration Diff Successful")
+    },
+    failure: async (response: Response) => {
+      logger.warn("Migration Diff Failed", JSON.stringify(await response?.json(), null, 4))
     },
   })
 }
 
 export async function applyDiff(environment: Environment, diff: any) {
-  return await create({
+  return await CRUD({
+    method: Method.POST,
     environment,
     path: "schema/apply",
-    bodyData: diff,
-    handleResponse: async (response: Response) => {
-      if (response.ok) {
-        logger.log("Migration Successful")
-        return true
-      } else {
-        logger.log("Migration Failed", JSON.stringify(await response?.json(), null, 4))
-        return false
-      }
+    data: diff,
+    success: async (response: Response) => {
+      logger.log("Migration Successful")
+    },
+    failure: async (response: Response) => {
+      logger.log("Migration Failed", JSON.stringify(await response?.json(), null, 4))
     },
   })
 }

@@ -1,21 +1,7 @@
 #!/usr/bin/env node
-import { AdminIds, Environment, Role } from "./types/types"
+import { AdminIds, Environment, DirectusMigratorCommand } from "./types/types"
 import { SchemaMigrator, PermissionMigrator, RoleMigrator } from "./migrators"
 import logger from "./utils/Logger"
-
-export type DirectusMigratorCommand = {
-  init?: boolean
-  add?: boolean
-  force?: boolean
-  source?: string | Environment
-  target?: string | Environment
-  debug?: boolean
-  verbose?: boolean
-  roles?: boolean
-  permissions?: boolean
-  schema?: boolean
-  help?: boolean
-}
 
 const migrateSchema = async (source: Environment, target: Environment, force: boolean) => {
   try {

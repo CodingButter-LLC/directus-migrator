@@ -52,3 +52,17 @@ export type AdminIds = {
   sourceAdminId: string
   targetAdminId: string
 }
+
+export type DirectusMigratorCommand = {
+  init?: boolean
+  add?: boolean
+  force?: boolean
+  source?: string | Environment
+  target?: string | Environment
+  debug?: boolean
+  verbose?: boolean
+  roles?: boolean
+  permissions?: boolean
+  schema?: boolean
+  help?: boolean
+}

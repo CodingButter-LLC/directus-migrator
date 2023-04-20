@@ -1,32 +1,26 @@
 import { Environment } from "../types/types"
 import logger from "./Logger"
 
-async function MiddleWare(
-  environment: Environment,
-  path: string,
-  url: string,
-  options?: any
-): Promise<Response> {
-  const response = await fetch(url, options)
-  logger.table({
-    Environment: environment.name,
-    Endpoint: path,
-    Method: options.method,
-    URL: url,
-    StatusCode: response?.status,
-  })
-  if (response.status >= 400) {
-    process.exit(0)
-  }
-  return response
+export enum Method {
+  GET = "GET",
+  POST = "POST",
+  PATCH = "PATCH",
+  PUT = "PATCH",
+  DELETE = "DELETE",
 }
 
-export interface CRUD {
+const headers = {
+  "Content-Type": "application/json",
+}
+export interface CRUDInterface {
   environment: Environment
   path: string
-  bodyData?: any
+  data?: any
   handleResponse?: (response: Response) => Promise<any>
   params?: any
+  method: Method
+  success?: (response: Response) => Promise<any>
+  failure?: (response: Response) => Promise<any>
 }
 
 const URL = (environment: Environment, path: string, params: any) => {
@@ -41,50 +35,31 @@ const URL = (environment: Environment, path: string, params: any) => {
   return url
 }
 
-const headers = {
-  "Content-Type": "application/json",
-}
-
-export const create = async ({ environment, path, bodyData, handleResponse, params }: CRUD) => {
-  const response = await MiddleWare(environment, path, URL(environment, path, params), {
-    method: "POST",
+export default async function CRUD({
+  environment,
+  path,
+  data,
+  params,
+  method = Method.GET,
+  success,
+  failure,
+}: CRUDInterface): Promise<any> {
+  const response = await fetch(URL(environment, path, params), {
+    method,
     headers,
-    body: bodyData && JSON.stringify(bodyData),
+    body: data && JSON.stringify(data),
   })
-  if (handleResponse) return await handleResponse(response)
-  return await response.json()
-}
-
-export const get = async ({ environment, path, handleResponse, bodyData, params }: CRUD) => {
-  const response = await MiddleWare(environment, path, URL(environment, path, params), {
-    method: "GET",
-    headers,
-    body: bodyData && JSON.stringify(bodyData),
-  })
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    logger.error("GET Failed", JSON.stringify(jsonResponse, null, 4))
+  if (response.ok) {
+    try {
+      const jsonResp = await response.json()
+      success && success(response)
+      return jsonResp
+    } catch (err) {
+      return await response.text()
+    }
+  } else {
+    failure && failure(response)
+    logger.warn("CRUD Failed", JSON.stringify(await response?.json(), null, 4))
+    return false
   }
-  if (handleResponse) return await handleResponse(response)
-  return jsonResponse
-}
-
-export const update = async ({ environment, path, bodyData, handleResponse, params }: CRUD) => {
-  const response = await MiddleWare(environment, path, URL(environment, path, params), {
-    method: "PATCH",
-    headers,
-    body: bodyData && JSON.stringify(bodyData),
-  })
-  if (handleResponse) return await handleResponse(response)
-  return await response.json()
-}
-
-export const remove = async ({ environment, path, bodyData, handleResponse, params }: CRUD) => {
-  const response = await MiddleWare(environment, path, URL(environment, path, params), {
-    method: "DELETE",
-    headers,
-    body: bodyData && JSON.stringify(bodyData),
-  })
-  if (handleResponse) return await handleResponse(response)
-  return await response.json()
 }

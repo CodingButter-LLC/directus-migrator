@@ -1,9 +1,9 @@
 import { AdminIds, Environment, Permission, Role } from "../types/types"
-import { create, get, update, remove, CRUD } from "../utils/CRUD"
+import CRUD, { Method } from "../utils/CRUD"
 import logger from "../utils/Logger.js"
 
 interface PermissionExecution {
-  action: (crud: CRUD) => Promise<any>
+  method: Method
   environment: Environment
   permissions?: Partial<Permission[]> | Partial<Permission> | number[]
   id?: number
@@ -12,7 +12,7 @@ interface PermissionExecution {
 }
 
 function removeUnwantedPermissions(permissions: Permission[], adminId: string): Permission[] {
-  return permissions.filter(({ role, id }) => role !== adminId || id !== null)
+  return permissions.filter(({ role, id }) => role != adminId && id != null)
 }
 
 function getPermissionAction(
@@ -41,50 +41,46 @@ function getPermissionAction(
 }
 
 async function getPermissions(environment: Environment) {
-  const privatePerms = await get({
+  const privatePerms = await CRUD({
+    method: Method.GET,
     environment,
     path: "permissions",
-    params: { "filter[id][_null]": false, "filter[role][_null]": false, limit: -1 },
+    params: { "filter[id][_nnull]": true, "filter[role][_nnull]": true, limit: -1 },
   })
-  const publicPerms = await get({
+  const publicPerms = await CRUD({
+    method: Method.GET,
     environment,
     path: "permissions",
-    params: { "filter[role][_null]": true, "filter:[id][_null]": false, limit: -1 },
+    params: { "filter[role][_null]": true, "filter[id][_nnull]": true, limit: -1 },
   })
   return [...privatePerms?.data, ...publicPerms?.data]
 }
 
 async function executePermissionAction({
-  action,
+  method,
   environment,
   permissions,
   id,
   successMessage,
   failMessage,
 }: PermissionExecution) {
-  logger.log("", `Executing ${action.name} on ${environment.name}...`)
+  logger.log("", `Executing ${method} on ${environment.name}...`)
   logger.log("", `Permissions: ${JSON.stringify(permissions, null, 4)}`)
-  const roleResponse = await action({
+  const roleResponse = await CRUD({
+    method,
     environment,
     path: `permissions${id ? `/${id}` : ""}`,
-    bodyData: permissions,
-    handleResponse: async (response: Response) => {
-      const jsonResponse = await response.json()
-      const jsonString = JSON.stringify(jsonResponse, null, 4)
-      if (!response.ok) {
-        failMessage && logger.error(failMessage(jsonString))
-      } else {
-        const { data } = jsonResponse
-        if (data) {
-          if (successMessage) {
-            logger.log(successMessage(data))
-            logger.table(data)
-          }
-          return data
-        } else {
-          failMessage && logger.error(failMessage(jsonString))
-        }
+    data: permissions,
+    success: async (response: Response) => {
+      try {
+        const jsonResponse = await response.json()
+        successMessage && logger.log(successMessage(jsonResponse.data))
+      } catch (err) {
+        logger.error(err)
       }
+    },
+    failure: async (response: Response) => {
+      failMessage && logger.error(failMessage(""))
     },
   })
   return roleResponse
@@ -113,7 +109,7 @@ export async function migrate(source: Environment, target: Environment, adminIds
     })
     if (createdPermissions.length > 0) {
       await executePermissionAction({
-        action: create,
+        method: Method.POST,
         environment: target,
         permissions: createdPermissions,
         successMessage: (_data: any[]) => `Created ${createdPermissions.length} Permission/s`,
@@ -123,14 +119,14 @@ export async function migrate(source: Environment, target: Environment, adminIds
 
     if (updatedPermissions.length > 0) {
       await Promise.all(
-        updatedPermissions.map(async (permissions) => {
+        updatedPermissions.map(async (permissions, index) => {
           const { id } = permissions
           return await executePermissionAction({
-            action: update,
+            method: Method.PATCH,
             permissions,
             environment: target,
             id,
-            successMessage: (_data?: any) => `Updated ${updatedPermissions.length} Permission/s`,
+            successMessage: (_data?: any) => `Updated Permission ${index} with id:${id}`,
             failMessage: (message: any) => `Failed to Update Permission: ${message}`,
           })
         })
@@ -141,7 +137,7 @@ export async function migrate(source: Environment, target: Environment, adminIds
     if (deletedPermissions.length) {
       const ids = deletedPermissions.map(({ id }) => id)
       await executePermissionAction({
-        action: remove,
+        method: Method.DELETE,
         environment: target,
         permissions: ids,
         successMessage: (permissions: any) => `Deleted ${permissions.length} Permission/s`,
