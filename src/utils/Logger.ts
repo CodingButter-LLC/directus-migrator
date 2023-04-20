@@ -1,9 +1,11 @@
-let DEBUG_LEVEL
+import { DirectusMigratorCommand } from "../"
 
-const setDebugLevel = ({ debug, verbose }) => {
+let DEBUG_LEVEL: "debug" | "verbose" | false = false
+
+const setDebugLevel = function ({ debug, verbose }: DirectusMigratorCommand) {
   DEBUG_LEVEL = verbose ? "verbose" : debug ? "debug" : false
 }
-const detail = (logMethod, message, ...extra) => {
+const detail = (logMethod: (...data: any[]) => void, message: any, ...extra: any[]) => {
   if (DEBUG_LEVEL === "debug") {
     logMethod(message)
   } else if (DEBUG_LEVEL === "verbose") {
@@ -12,19 +14,19 @@ const detail = (logMethod, message, ...extra) => {
 ${extra?.join(", ")}`)
   }
 }
-const log = (message, ...extra) => {
+const log = function (message: any, ...extra: any[]) {
   detail(console.log, message, ...extra)
 }
-const warn = (message, ...extra) => {
+const warn = function (message: any, ...extra: any[]) {
   detail(console.warn, message, ...extra)
 }
-const error = (message, ...extra) => {
+const error = function (message: any, ...extra: any[]) {
   detail(console.error, message, ...extra)
 }
-const info = (message, ...extra) => {
+const info = function (message: any, ...extra: any[]) {
   detail(console.info, message, ...extra)
 }
-const table = (message) => {
+const table = function (message: any) {
   if (DEBUG_LEVEL === "verbose") console.table(message)
 }
 

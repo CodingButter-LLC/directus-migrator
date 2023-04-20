@@ -1,8 +1,13 @@
-import { create, get, update, remove } from "./utils/CRUD.js"
-import logger from "./utils/Logger.js"
-const permIDS = (permissions) => permissions.map(({ id }) => id)
+import { Environment, Permission, Role } from "../types/types"
+import { create, get, update, remove } from "../utils/CRUD"
+import { DirectusMigratorCommand } from "../"
+import logger from "../utils/Logger.js"
 
-const sanitizePermissions = (permissions) => {
+function permIDS(permissions: Permission[]) {
+  return permissions.map(({ id }) => id)
+}
+
+function sanitizePermissions(permissions: Permission[]) {
   return permissions.map((permission) => {
     const sanitizedPermission = { ...permission }
     delete sanitizedPermission.id
@@ -10,20 +15,7 @@ const sanitizePermissions = (permissions) => {
   })
 }
 
-export const swapRoleIds = (permissions, mergedRoles) => {
-  return sanitizePermissions(permissions)
-    .map((permission) => {
-      const { role } = permission
-      const mergedRole = mergedRoles.find((mergedRole) => mergedRole.sourceId === role)
-      if (mergedRole) {
-        return { ...permission, role: mergedRole.targetId }
-      }
-      return null
-    })
-    .filter((permission) => permission !== null)
-}
-
-export async function getPermissions(environment) {
+export async function getPermissions(environment: Environment) {
   const privatePerms = await get({ environment, path: "permissions", params: { limit: -1 } })
   const publicPerms = await get({
     environment,
@@ -33,11 +25,11 @@ export async function getPermissions(environment) {
   return [...privatePerms.data, ...publicPerms.data]
 }
 
-export function getNullRolePermissions(permissions) {
+export function getNullRolePermissions(permissions: Permission[]) {
   return permissions.filter((permission) => permission.role === null)
 }
 
-export async function removePermissions(environment, permissions, mergedRoles) {
+export async function removePermissions(environment: Environment, permissions: Permission[]) {
   const ids = permIDS(permissions).filter((id) => id)
   logger.log("Remove Permission ids")
   logger.table(ids)
@@ -56,15 +48,23 @@ export async function removePermissions(environment, permissions, mergedRoles) {
   })
   return response
 }
-const removeAdminPermissions = (permissions, adminId) => {
-  return permissions.filter((permission) => permission.role !== adminId)
+
+function removeAdminPermissions(permissions: Permission[], roles: Role[]) {
+  const adminId = roles?.find((role: Role) => role.name === "Administrator")?.id
+  return permissions.filter((permission: Permission) => permission.id !== adminId)
 }
-export async function migrate(args, source, target, mergedRoles, force = false) {
+
+export async function migrate(
+  args: DirectusMigratorCommand,
+  source: Environment,
+  target: Environment,
+  sourceRoles: Role[],
+  targetRoles: Role[]
+) {
   try {
     logger.setDebugLevel(args)
-    const { sourceId, targetId } = mergedRoles?.find(({ name }) => name == "Administrator")
-    const targetPermissions = removeAdminPermissions(await getPermissions(target), targetId)
-    const sourcePermissions = removeAdminPermissions(await getPermissions(source), sourceId)
+    const targetPermissions = removeAdminPermissions(await getPermissions(target), targetRoles)
+    const sourcePermissions = removeAdminPermissions(await getPermissions(source), sourceRoles)
     if (sourcePermissions.length) {
       const newPermissions = sanitizePermissions(sourcePermissions) //swapRoleIds(sourcePermissions, mergedRoles)
       logger.log("New Permissions")
@@ -81,12 +81,12 @@ export async function migrate(args, source, target, mergedRoles, force = false) 
         handleResponse: async (response) => {
           if (response.ok) {
             logger.log(`Created permissions`)
-
             logger.table(createRoles)
-            return true
+            return await response.json()
           } else {
             logger.error("Error Creating Permissions")
             logger.table(createRoles)
+            return []
           }
         },
       })
