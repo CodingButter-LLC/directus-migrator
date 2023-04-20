@@ -38,7 +38,7 @@ export type Role = {
 }
 
 export type Permission = {
-  id?: number
+  id: number
   role: string
   collection: string
   action: string

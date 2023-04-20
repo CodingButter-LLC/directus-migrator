@@ -7,18 +7,12 @@ interface PermissionExecution {
   environment: Environment
   permissions?: Partial<Permission[]> | Partial<Permission> | number[]
   id?: number
-  successMessage?: string
-  failMessage?: string
+  successMessage?: (message: any) => string
+  failMessage?: (message: any) => string
 }
 
-function permIDS(permissions: Permission[]): number[] {
-  return permissions
-    .filter((permission) => permission.id)
-    ?.map((permission) => permission.id) as number[]
-}
-
-function removeAdminPermissions(permissions: Permission[], adminId: string): Permission[] {
-  return permissions.filter(({ role }) => role !== adminId)
+function removeUnwantedPermissions(permissions: Permission[], adminId: string): Permission[] {
+  return permissions.filter(({ role, id }) => role !== adminId || id !== null)
 }
 
 function getPermissionAction(
@@ -30,20 +24,16 @@ function getPermissionAction(
   deletedPermissions: Permission[]
 } {
   const createdPermissions = sourcePermissions.filter((sourcePermission) => {
-    return !targetPermissions.find((targetPermission) => {
-      return sourcePermission.id === targetPermission.id
-    })
+    return !targetPermissions.find(({ id }) => sourcePermission.id === id)
   })
 
   const updatedPermissions = sourcePermissions.filter((sourcePermission) => {
-    return targetPermissions.find((targetPermission) => {
-      return sourcePermission.id === targetPermission.id
-    })
+    return targetPermissions.find(({ id }) => sourcePermission.id === id)
   })
 
   const deletedPermissions = targetPermissions.filter((targetPermission) => {
-    return !sourcePermissions.find((sourcePermission) => {
-      return sourcePermission.id === targetPermission.id
+    return !sourcePermissions.find(({ id }) => {
+      return id === targetPermission.id
     })
   })
 
@@ -51,13 +41,17 @@ function getPermissionAction(
 }
 
 async function getPermissions(environment: Environment) {
-  const privatePerms = await get({ environment, path: "permissions", params: { limit: -1 } })
+  const privatePerms = await get({
+    environment,
+    path: "permissions",
+    params: { "filter[id][_null]": false, "filter[role][_null]": false, limit: -1 },
+  })
   const publicPerms = await get({
     environment,
     path: "permissions",
-    params: { "filter[role][_null]": true, limit: -1 },
+    params: { "filter[role][_null]": true, "filter:[id][_null]": false, limit: -1 },
   })
-  return [...privatePerms.data, ...publicPerms.data]
+  return [...privatePerms?.data, ...publicPerms?.data]
 }
 
 async function executePermissionAction({
@@ -68,19 +62,28 @@ async function executePermissionAction({
   successMessage,
   failMessage,
 }: PermissionExecution) {
+  logger.log("", `Executing ${action.name} on ${environment.name}...`)
+  logger.log("", `Permissions: ${JSON.stringify(permissions, null, 4)}`)
   const roleResponse = await action({
     environment,
     path: `permissions${id ? `/${id}` : ""}`,
     bodyData: permissions,
     handleResponse: async (response: Response) => {
+      const jsonResponse = await response.json()
+      const jsonString = JSON.stringify(jsonResponse, null, 4)
       if (!response.ok) {
-        failMessage && logger.error(failMessage)
-        return null
+        failMessage && logger.error(failMessage(jsonString))
       } else {
-        const jsonResponse = await response.json()
-        successMessage && logger.log(successMessage, jsonResponse.data)
-        if (jsonResponse.data) return jsonResponse.data
-        return jsonResponse
+        const { data } = jsonResponse
+        if (data) {
+          if (successMessage) {
+            logger.log(successMessage(data))
+            logger.table(data)
+          }
+          return data
+        } else {
+          failMessage && logger.error(failMessage(jsonString))
+        }
       }
     },
   })
@@ -88,55 +91,61 @@ async function executePermissionAction({
 }
 
 export async function migrate(source: Environment, target: Environment, adminIds: AdminIds) {
-  const targetPermissions = removeAdminPermissions(
+  const targetPermissions = removeUnwantedPermissions(
     await getPermissions(target),
     adminIds.targetAdminId
   )
 
-  const sourcePermissions = removeAdminPermissions(
+  const sourcePermissions = removeUnwantedPermissions(
     await getPermissions(source),
     adminIds.sourceAdminId
   )
 
-  if (sourcePermissions.length) {
+  if (sourcePermissions.length > 0) {
     const { createdPermissions, updatedPermissions, deletedPermissions } = getPermissionAction(
       sourcePermissions,
       targetPermissions
     )
-
-    if (createdPermissions.length) {
+    logger.table({
+      Created: createdPermissions.length,
+      Updated: updatedPermissions.length,
+      Deleted: deletedPermissions.length,
+    })
+    if (createdPermissions.length > 0) {
       await executePermissionAction({
         action: create,
         environment: target,
         permissions: createdPermissions,
-        successMessage: "Created Permissions",
-        failMessage: "Failed to create Permissions",
+        successMessage: (_data: any[]) => `Created ${createdPermissions.length} Permission/s`,
+        failMessage: (message: any) => `Failed to create Permission: ${message}`,
       })
     }
 
-    if (updatedPermissions.length) {
+    if (updatedPermissions.length > 0) {
       await Promise.all(
-        updatedPermissions.map((permission) => {
-          const { id, ...data } = permission
-          return executePermissionAction({
+        updatedPermissions.map(async (permissions) => {
+          const { id } = permissions
+          return await executePermissionAction({
             action: update,
+            permissions,
             environment: target,
             id,
-            permissions: data,
-            failMessage: `Failed to update Permissions ${id}`,
+            successMessage: (_data?: any) => `Updated ${updatedPermissions.length} Permission/s`,
+            failMessage: (message: any) => `Failed to Update Permission: ${message}`,
           })
         })
       )
-      logger.log("Permissions Updated", permIDS(updatedPermissions))
+      logger.log("Permissions Updated", updatedPermissions)
     }
 
     if (deletedPermissions.length) {
+      const ids = deletedPermissions.map(({ id }) => id)
       await executePermissionAction({
         action: remove,
         environment: target,
-        permissions: permIDS(deletedPermissions),
-        successMessage: "Deleted Permissions",
-        failMessage: "Failed to delete Permissions",
+        permissions: ids,
+        successMessage: (permissions: any) => `Deleted ${permissions.length} Permission/s`,
+        failMessage: (message: any) => `Failed to Delete Permission: ${message}`,
       })
     }
   }

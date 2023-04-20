@@ -42,11 +42,13 @@ export async function DirectusMigrator(
   target: Environment,
   args: DirectusMigratorCommand
 ) {
+  logger.setDebugLevel(args)
   const { force = false, roles, permissions, schema } = args
 
   if (roles || permissions || schema) {
     if (schema) return await migrateSchema(source, target, force)
     const adminIds = await migrateRoles(source, target)
+    logger.table(adminIds)
     if (permissions) await migratePermissions(source, target, adminIds)
   } else {
     await migrateSchema(source, target, force)

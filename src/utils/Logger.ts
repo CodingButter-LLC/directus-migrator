@@ -2,7 +2,7 @@ import { DirectusMigratorCommand } from "../"
 
 let DEBUG_LEVEL: "debug" | "verbose" | false = "debug"
 
-const setDebugLevel = function ({ debug, verbose }: DirectusMigratorCommand) {
+const setDebugLevel = function ({ debug, verbose }: Partial<DirectusMigratorCommand>) {
   DEBUG_LEVEL = verbose ? "verbose" : debug ? "debug" : false
 }
 const detail = (logMethod: (...data: any[]) => void, message: any, ...extra: any[]) => {
@@ -21,7 +21,8 @@ const warn = function (message: any, ...extra: any[]) {
   detail(console.warn, message, ...extra)
 }
 const error = function (message: any, ...extra: any[]) {
-  detail(console.error, message, ...extra)
+  detail(console.error, `Error:  ${message}`, ...extra)
+  if (DEBUG_LEVEL === "debug") process.exit(1)
 }
 const info = function (message: any, ...extra: any[]) {
   detail(console.info, message, ...extra)

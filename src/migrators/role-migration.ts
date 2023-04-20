@@ -7,8 +7,8 @@ export interface RoleExecution {
   environment: Environment
   roles?: Partial<Role[]> | Partial<Role>
   id?: string
-  successMessage?: string
-  failMessage?: string
+  successMessage?: (message: any) => string
+  failMessage?: (message: any) => string
 }
 
 export function removeAdmin(roles: Role[]): [roles: Role[], adminId: string] {
@@ -34,9 +34,14 @@ export async function getRoleCategories(
   const [sourceRoles, sourceAdminId] = removeAdmin(await getRoles(source))
   const [targetRoles, targetAdminId] = removeAdmin(await getRoles(target))
   const adminIds: AdminIds = { sourceAdminId, targetAdminId }
-  const createdRoles = sourceRoles.filter(
-    (sourceRole: Role) => !targetRoles.find((targetRole: Role) => sourceRole.id === targetRole.id)
-  )
+  const createdRoles = sourceRoles
+    .filter(
+      (sourceRole: Role) => !targetRoles.find((targetRole: Role) => sourceRole.id === targetRole.id)
+    )
+    .map((role) => {
+      role.users = []
+      return role
+    })
   const deletedRoles = targetRoles.filter(
     (targetRole: Role) => !sourceRoles.find((sourceRole: Role) => sourceRole.id === targetRole.id)
   )
@@ -58,12 +63,13 @@ export async function executeRoleAction({
     handleResponse: async (response: Response) => {
       if (!response.ok) {
         failMessage && logger.error(failMessage)
+        logger.log(await response.text())
         return null
       } else {
         const jsonResponse = await response.json()
         successMessage && logger.log(successMessage, jsonResponse.data)
         if (jsonResponse.data) return jsonResponse.data
-        return jsonResponse
+        return []
       }
     },
   })
@@ -72,17 +78,17 @@ export async function executeRoleAction({
 
 export async function migrate(source: Environment, target: Environment): Promise<AdminIds> {
   const { createdRoles, deletedRoles, adminIds } = await getRoleCategories(source, target)
-  if (createdRoles.length) {
+  if (createdRoles.length > 0) {
     await executeRoleAction({
       action: create,
       roles: createdRoles,
       environment: target,
-      successMessage: "Created Roles",
-      failMessage: "Failed to create roles",
+      successMessage: (roles: any) => `Created ${roles.length} Role/s`,
+      failMessage: (message: any) => `Failed to create roles ${message}`,
     })
   }
 
-  if (deletedRoles.length) {
+  if (deletedRoles.length > 0) {
     await Promise.all(
       deletedRoles.map((role) => {
         const { id } = role
@@ -90,8 +96,8 @@ export async function migrate(source: Environment, target: Environment): Promise
           action: remove,
           environment: target,
           id,
-          successMessage: "Deleted Role",
-          failMessage: "Failed to delete role",
+          successMessage: (roles: any) => `Deleted ${roles.length} Role/s`,
+          failMessage: (message: any) => `Failed to Delete roles \n${message}`,
         })
       })
     )

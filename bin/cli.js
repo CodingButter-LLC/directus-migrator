@@ -1,50 +1,114 @@
-import { parse } from "ts-command-line-args"
-import prompts from "prompts"
-import figlet from "figlet"
-import { DirectusMigrator } from "../dist/index.js"
+const commandLineArgs = require("command-line-args")
+const commandLineUsage = require("command-line-usage")
+const prompts = require("prompts")
+const figlet = require("figlet")
+const fs = require("fs")
+const path = require("path")
+const { DirectusMigrator } = require("../dist/index.js")
+const { argv } = process
 
-const args = parse(
+const optionDefinitions = [
   {
-    init: { type: Boolean, alias: "i", description: "Initialize the config", optional: true },
-    add: {
-      type: Boolean,
-      alias: "a",
-      description: "Add an environment to the config",
-      optional: true,
-    },
-    force: { type: Boolean, alias: "f", description: "Force the migration", optional: true },
-    source: { type: String, alias: "s", description: "The source environment", optional: true },
-    target: { type: String, alias: "t", description: "The target environment", optional: true },
-    debug: { type: Boolean, alias: "d", description: "Enable debug mode", optional: true },
-    verbose: { type: Boolean, alias: "v", description: "Enable verbose mode", optional: true },
-    help: { type: Boolean, alias: "h", description: "Show help", optional: true },
-    roles: { type: Boolean, alias: "r", description: "Migrate roles", optional: true },
-    permissions: { type: Boolean, alias: "p", description: "Migrate permissions", optional: true },
-    schema: { type: Boolean, alias: "c", description: "Migrate schema", optional: true },
+    name: "init",
+    type: Boolean,
+    alias: "i",
+    description: "Initialize the config",
+    optional: true,
   },
   {
-    helpArg: "help",
-    headerContentSections: [
-      {
-        header: figlet.textSync("Directus Migrator", { horizontalLayout: "full" }),
-        content: "Thanks for using Directus Migrator!",
-      },
-    ],
-    footerContentSections: [
-      {
-        content:
-          "For more information, visit https://github.com/codingbutter-llc/directus-migrator",
-        header: "Additional info",
-      },
-    ],
-  }
-)
+    name: "add",
+    type: Boolean,
+    alias: "a",
+    description: "Add an environment to the config",
+    optional: true,
+  },
+  {
+    name: "force",
+    type: Boolean,
+    alias: "f",
+    description: "Force the migration",
+    optional: true,
+  },
+  {
+    name: "source",
+    type: String,
+    alias: "s",
+    description: "The source environment",
+    optional: true,
+  },
+  {
+    name: "target",
+    type: String,
+    alias: "t",
+    description: "The target environment",
+    optional: true,
+  },
+  {
+    name: "debug",
+    type: Boolean,
+    alias: "d",
+    description: "Enable debug mode",
+    optional: true,
+  },
+  {
+    name: "verbose",
+    type: Boolean,
+    alias: "v",
+    description: "Enable verbose mode",
+    optional: true,
+  },
+  {
+    name: "help",
+    type: Boolean,
+    alias: "h",
+    description: "Show help",
+    optional: true,
+  },
+  {
+    name: "roles",
+    type: Boolean,
+    alias: "r",
+    description: "Migrate roles",
+    optional: true,
+  },
+  {
+    name: "permissions",
+    type: Boolean,
+    alias: "p",
+    description: "Migrate permissions",
+    optional: true,
+  },
+  {
+    name: "schema",
+    type: Boolean,
+    alias: "c",
+    description: "Migrate schema",
+    optional: true,
+  },
+]
 
-logger.setDebugLevel(args)
-logger.log(figlet.textSync("Directus Migrator", { horizontalLayout: "full" }))
+const usage = commandLineUsage([
+  {
+    header: figlet.textSync("Migrator", {
+      horizontalLayout: "full",
+      verticalLayout: "small",
+      font: "ANSI Shadow",
+    }),
+    content: "Thanks for using Directus Migrator!",
+  },
+  {
+    header: "Options",
+    optionList: optionDefinitions,
+  },
+  {
+    header: "Additional info",
+    content: "For more information, visit https://github.com/codingbutter-llc/directus-migrator",
+  },
+])
+const args = commandLineArgs(optionDefinitions, { helpArg: "help", partial: true, argv })
 
-const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.mjs")
-let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath).default : []
+const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
+let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : []
 
 const addEnvironment = async () => {
   const { name, endpoint, accessToken } = await prompts([
@@ -97,7 +161,7 @@ const addEnvironment = async () => {
     `const config = ${JSON.stringify(currentConfig, null, 2)}
  export default config`
   )
-  logger.log("Config updated!")
+  console.log("Config updated!")
   await addEnvQuestion()
 }
 
@@ -146,8 +210,9 @@ const getEnvironments = async (sourceName, targetName) => {
 ;(async () => {
   if (args?.init) return init()
   if (args?.add) return await addEnvironment()
+  if (args?.help) return console.log(usage)
   else {
-    if (!currentConfig.length) {
+    if (currentConfig.length) {
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
       await DirectusMigrator(sourceConfig, targetConfig, args)
     }

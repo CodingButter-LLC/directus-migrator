@@ -15,7 +15,7 @@ export async function migrate(
     if (!applied) return { status: "failed" }
     return { status: "success" }
   } catch (err) {
-    logger.error("Migration Failed: Are you sure there are changes to be made?", err)
+    logger.warn("Migration Failed: Are you sure there are changes to be made?", err)
   }
 }
 
@@ -52,12 +52,12 @@ export async function applyDiff(environment: Environment, diff: any) {
     environment,
     path: "schema/apply",
     bodyData: diff,
-    handleResponse: async (response) => {
+    handleResponse: async (response: Response) => {
       if (response.ok) {
         logger.log("Migration Successful")
         return true
       } else {
-        logger.log("Migration Failed", JSON.stringify(await response.json(), null, 4))
+        logger.log("Migration Failed", JSON.stringify(await response?.json(), null, 4))
         return false
       }
     },
