@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "bin": {
-    "directus-migrator": "dist/index.js"
+    "directus-migrator": "bin/cli.cjs"
   },
   "scripts": {
     "build": "npx tsc"

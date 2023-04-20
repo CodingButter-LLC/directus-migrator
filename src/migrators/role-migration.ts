@@ -1,15 +1,19 @@
-import { Environment, Role } from "../types/types"
-import { create, get, update, remove, CRUD } from "../utils/CRUD"
+import { Environment, Role, AdminIds } from "../types/types"
+import { create, get, remove, CRUD } from "../utils/CRUD"
 import logger from "../utils/Logger"
 
-/**
- *
- * @param {Array} roles
- * @returns {Array}
- * @description Removes id and users from roles
- */
-export function sanitizeRoles(roles: Role[]): Partial<Role[]> {
-  return roles.filter((role) => role.name !== "Administrator")
+export interface RoleExecution {
+  action: (crud: CRUD) => Promise<any>
+  environment: Environment
+  roles?: Partial<Role[]> | Partial<Role>
+  id?: string
+  successMessage?: string
+  failMessage?: string
+}
+
+export function removeAdmin(roles: Role[]): [roles: Role[], adminId: string] {
+  const adminId = roles.find((role) => role.name === "Administrator")?.id || ""
+  return [roles.filter((role) => role.id !== adminId), adminId]
 }
 
 export async function getRoles(environment: Environment) {
@@ -19,75 +23,79 @@ export async function getRoles(environment: Environment) {
   return data
 }
 
-export function swapUsers(sourceRoles: Role[], targetRoles: Role[]): Role[] {
-  return sourceRoles.map((sourceRole: Role) => {
-    const targetRole = targetRoles.find((targetRole: Role) => targetRole.name === sourceRole.name)
-    if (targetRole) {
-      return { ...sourceRole, users: targetRole.users }
-    }
-    return { ...sourceRole, users: [] }
-  })
-}
-
 export async function getRoleCategories(
   source: Environment,
   target: Environment
 ): Promise<{
-  updatedRoles: Role[]
   createdRoles: Role[]
   deletedRoles: Role[]
+  adminIds: AdminIds
 }> {
-  const sourceRoles = await getRoles(source)
-  const targetRoles = await getRoles(target)
+  const [sourceRoles, sourceAdminId] = removeAdmin(await getRoles(source))
+  const [targetRoles, targetAdminId] = removeAdmin(await getRoles(target))
+  const adminIds: AdminIds = { sourceAdminId, targetAdminId }
   const createdRoles = sourceRoles.filter(
-    (soureRole: Role) => !targetRoles.find((targetRole: Role) => soureRole.name === targetRole.name)
-  )
-  const updatedRoles = sourceRoles.filter((soureRole: Role) =>
-    targetRoles.find((targetRole: Role) => soureRole.name === targetRole.name)
+    (sourceRole: Role) => !targetRoles.find((targetRole: Role) => sourceRole.id === targetRole.id)
   )
   const deletedRoles = targetRoles.filter(
-    (targetRole: Role) => !sourceRoles.find((soureRole: Role) => soureRole.name === targetRole.name)
+    (targetRole: Role) => !sourceRoles.find((sourceRole: Role) => sourceRole.id === targetRole.id)
   )
-  return { updatedRoles, createdRoles, deletedRoles }
+  return { createdRoles, deletedRoles, adminIds }
 }
 
-export async function executeRoleAction(
-  action: (crud: CRUD) => Promise<any>,
-  environment: Environment,
-  roles: Partial<Role[]>
-) {
+export async function executeRoleAction({
+  action,
+  environment,
+  roles,
+  id,
+  successMessage,
+  failMessage,
+}: RoleExecution) {
   const roleResponse = await action({
     environment,
-    path: "roles",
+    path: `roles${id ? `/${id}` : ""}`,
     bodyData: roles,
     handleResponse: async (response: Response) => {
       if (!response.ok) {
-        throw new Error(`Failed to create roles`)
+        failMessage && logger.error(failMessage)
+        return null
+      } else {
+        const jsonResponse = await response.json()
+        successMessage && logger.log(successMessage, jsonResponse.data)
+        if (jsonResponse.data) return jsonResponse.data
+        return jsonResponse
       }
-      const jsonResponse = await response.json()
-      logger.log("Created Roles", jsonResponse.data)
-      if (jsonResponse.data) return jsonResponse.data
-      return jsonResponse
     },
   })
   return roleResponse
 }
 
-export async function migrate(source: Environment, target: Environment): Promise<Partial<Role>[]> {
-  try {
-    const { createdRoles, updatedRoles, deletedRoles } = await getRoleCategories(source, target)
-    if (createdRoles.length) {
-      await executeRoleAction(create, target, createdRoles)
-    }
-    if (updatedRoles.length) {
-      await executeRoleAction(update, target, updatedRoles)
-    }
-    if (deletedRoles.length) {
-      await executeRoleAction(remove, target, deletedRoles)
-    }
-    return [...createdRoles, ...updatedRoles]
-  } catch (err) {
-    logger.error("Error Migrating Roles", err)
+export async function migrate(source: Environment, target: Environment): Promise<AdminIds> {
+  const { createdRoles, deletedRoles, adminIds } = await getRoleCategories(source, target)
+  if (createdRoles.length) {
+    await executeRoleAction({
+      action: create,
+      roles: createdRoles,
+      environment: target,
+      successMessage: "Created Roles",
+      failMessage: "Failed to create roles",
+    })
   }
-  return []
+
+  if (deletedRoles.length) {
+    await Promise.all(
+      deletedRoles.map((role) => {
+        const { id } = role
+        executeRoleAction({
+          action: remove,
+          environment: target,
+          id,
+          successMessage: "Deleted Role",
+          failMessage: "Failed to delete role",
+        })
+      })
+    )
+  }
+
+  return adminIds
 }

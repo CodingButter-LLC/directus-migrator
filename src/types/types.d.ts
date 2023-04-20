@@ -1,4 +1,3 @@
-
 export type Environment = {
   /** The name of your environment */
   name: string
@@ -8,34 +7,10 @@ export type Environment = {
   accessToken: string
 }
 
-
 export type MergedRole = {
   name: string
   sourceId: number
   targetId: number
-}
-
-
-
-export type Files = {
-  id: number
-  storage: string
-  filename_disk: string
-  filename_download: string
-  title: string
-  type: string
-  folder: string
-  uploaded_by: string[]
-  uploaded_on: string
-  modified_by: string[]
-  filesize: number
-  width: number
-  height: number
-  duration: number
-  description: string
-  location: string
-  tags: string[]
-  metadata: any
 }
 
 export type User = {
@@ -51,7 +26,7 @@ export type User = {
 }
 
 export type Role = {
-  id: number
+  id: string
   name: string
   icon: string
   description: string
@@ -59,16 +34,21 @@ export type Role = {
   enforce_tfa: boolean
   admin_access: boolean
   app_access: boolean
-  users?: User[]
+  users: User[]
 }
 
-export type Permission {
+export type Permission = {
   id?: number
-  role: string[]
+  role: string
   collection: string
   action: string
   permissions: any
   validation: any
   preset: any
   fields: string[]
+}
+
+export type AdminIds = {
+  sourceAdminId: string
+  targetAdminId: string
 }

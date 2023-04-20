@@ -1,20 +1,12 @@
-import path from "path"
-import { create, get, update, remove } from "./utils/CRUD.js"
-import logger from "./utils/Logger.js"
-let configArray
+import { create, get } from "../utils/CRUD.js"
+import logger from "../utils/Logger.js"
+import { Environment } from "../types/types.js"
 
-export const config = async (config = { path: "directus-migrator.config.mjs" }) => {
-  const configPath = `${path.join(process.cwd(), config.path)}`
-  if (!configArray) {
-    const config = await import(`${configPath}`)
-    configArray = config.default
-  }
-  return configArray
-}
-
-export async function migrate(args, source, target, force = false) {
-  //check if source is a string
-  logger.setDebugLevel(args)
+export async function migrate(
+  source: Environment,
+  target: Environment,
+  force?: boolean | undefined
+) {
   try {
     const snapshot = await getSnapshot(source)
     const diff = await getDiff(target, snapshot, force)
@@ -27,18 +19,22 @@ export async function migrate(args, source, target, force = false) {
   }
 }
 
-export async function getSnapshot(environment) {
+export async function getSnapshot(environment: Environment) {
   const { data } = await get({ environment, path: "schema/snapshot" })
   return data
 }
 
-export async function getDiff(environment, snapshot, force) {
+export async function getDiff(
+  environment: Environment,
+  snapshot: any,
+  force?: boolean | undefined
+) {
   return await create({
     environment,
     path: "schema/diff",
     params: { force },
     bodyData: snapshot,
-    handleResponse: async (response) => {
+    handleResponse: async (response: Response) => {
       if (response.ok) {
         logger.log("Migration Diff Successful")
         const jsonResponse = await response.json()
@@ -51,7 +47,7 @@ export async function getDiff(environment, snapshot, force) {
   })
 }
 
-export async function applyDiff(environment, diff) {
+export async function applyDiff(environment: Environment, diff: any) {
   return await create({
     environment,
     path: "schema/apply",

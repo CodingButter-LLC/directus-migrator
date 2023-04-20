@@ -1,6 +1,6 @@
 import { DirectusMigratorCommand } from "../"
 
-let DEBUG_LEVEL: "debug" | "verbose" | false = false
+let DEBUG_LEVEL: "debug" | "verbose" | false = "debug"
 
 const setDebugLevel = function ({ debug, verbose }: DirectusMigratorCommand) {
   DEBUG_LEVEL = verbose ? "verbose" : debug ? "debug" : false

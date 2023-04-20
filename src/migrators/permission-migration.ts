@@ -1,21 +1,56 @@
-import { Environment, Permission, Role } from "../types/types"
-import { create, get, update, remove } from "../utils/CRUD"
-import { DirectusMigratorCommand } from "../"
+import { AdminIds, Environment, Permission, Role } from "../types/types"
+import { create, get, update, remove, CRUD } from "../utils/CRUD"
 import logger from "../utils/Logger.js"
 
-function permIDS(permissions: Permission[]) {
-  return permissions.map(({ id }) => id)
+interface PermissionExecution {
+  action: (crud: CRUD) => Promise<any>
+  environment: Environment
+  permissions?: Partial<Permission[]> | Partial<Permission> | number[]
+  id?: number
+  successMessage?: string
+  failMessage?: string
 }
 
-function sanitizePermissions(permissions: Permission[]) {
-  return permissions.map((permission) => {
-    const sanitizedPermission = { ...permission }
-    delete sanitizedPermission.id
-    return sanitizedPermission
+function permIDS(permissions: Permission[]): number[] {
+  return permissions
+    .filter((permission) => permission.id)
+    ?.map((permission) => permission.id) as number[]
+}
+
+function removeAdminPermissions(permissions: Permission[], adminId: string): Permission[] {
+  return permissions.filter(({ role }) => role !== adminId)
+}
+
+function getPermissionAction(
+  sourcePermissions: Permission[],
+  targetPermissions: Permission[]
+): {
+  createdPermissions: Permission[]
+  updatedPermissions: Permission[]
+  deletedPermissions: Permission[]
+} {
+  const createdPermissions = sourcePermissions.filter((sourcePermission) => {
+    return !targetPermissions.find((targetPermission) => {
+      return sourcePermission.id === targetPermission.id
+    })
   })
+
+  const updatedPermissions = sourcePermissions.filter((sourcePermission) => {
+    return targetPermissions.find((targetPermission) => {
+      return sourcePermission.id === targetPermission.id
+    })
+  })
+
+  const deletedPermissions = targetPermissions.filter((targetPermission) => {
+    return !sourcePermissions.find((sourcePermission) => {
+      return sourcePermission.id === targetPermission.id
+    })
+  })
+
+  return { createdPermissions, updatedPermissions, deletedPermissions }
 }
 
-export async function getPermissions(environment: Environment) {
+async function getPermissions(environment: Environment) {
   const privatePerms = await get({ environment, path: "permissions", params: { limit: -1 } })
   const publicPerms = await get({
     environment,
@@ -25,73 +60,84 @@ export async function getPermissions(environment: Environment) {
   return [...privatePerms.data, ...publicPerms.data]
 }
 
-export function getNullRolePermissions(permissions: Permission[]) {
-  return permissions.filter((permission) => permission.role === null)
-}
-
-export async function removePermissions(environment: Environment, permissions: Permission[]) {
-  const ids = permIDS(permissions).filter((id) => id)
-  logger.log("Remove Permission ids")
-  logger.table(ids)
-  const response = await remove({
+async function executePermissionAction({
+  action,
+  environment,
+  permissions,
+  id,
+  successMessage,
+  failMessage,
+}: PermissionExecution) {
+  const roleResponse = await action({
     environment,
-    path: "permissions",
-    bodyData: ids,
-    handleResponse: async (response) => {
-      if (response.ok) {
-        logger.log(`Removed permissions`)
-        return true
+    path: `permissions${id ? `/${id}` : ""}`,
+    bodyData: permissions,
+    handleResponse: async (response: Response) => {
+      if (!response.ok) {
+        failMessage && logger.error(failMessage)
+        return null
       } else {
-        logger.error(JSON.stringify(await response.json(), null, 4))
+        const jsonResponse = await response.json()
+        successMessage && logger.log(successMessage, jsonResponse.data)
+        if (jsonResponse.data) return jsonResponse.data
+        return jsonResponse
       }
     },
   })
-  return response
+  return roleResponse
 }
 
-function removeAdminPermissions(permissions: Permission[], roles: Role[]) {
-  const adminId = roles?.find((role: Role) => role.name === "Administrator")?.id
-  return permissions.filter((permission: Permission) => permission.id !== adminId)
-}
+export async function migrate(source: Environment, target: Environment, adminIds: AdminIds) {
+  const targetPermissions = removeAdminPermissions(
+    await getPermissions(target),
+    adminIds.targetAdminId
+  )
 
-export async function migrate(
-  args: DirectusMigratorCommand,
-  source: Environment,
-  target: Environment,
-  sourceRoles: Role[],
-  targetRoles: Role[]
-) {
-  try {
-    logger.setDebugLevel(args)
-    const targetPermissions = removeAdminPermissions(await getPermissions(target), targetRoles)
-    const sourcePermissions = removeAdminPermissions(await getPermissions(source), sourceRoles)
-    if (sourcePermissions.length) {
-      const newPermissions = sanitizePermissions(sourcePermissions) //swapRoleIds(sourcePermissions, mergedRoles)
-      logger.log("New Permissions")
-      logger.table(newPermissions)
-      const nullRolePermissions = sanitizePermissions(getNullRolePermissions(sourcePermissions))
-      await removePermissions(target, targetPermissions)
-      const createRoles = [...newPermissions, ...nullRolePermissions]
-      logger.log("Create Permissions")
-      logger.table(createRoles)
-      const response = await create({
+  const sourcePermissions = removeAdminPermissions(
+    await getPermissions(source),
+    adminIds.sourceAdminId
+  )
+
+  if (sourcePermissions.length) {
+    const { createdPermissions, updatedPermissions, deletedPermissions } = getPermissionAction(
+      sourcePermissions,
+      targetPermissions
+    )
+
+    if (createdPermissions.length) {
+      await executePermissionAction({
+        action: create,
         environment: target,
-        path: "permissions",
-        bodyData: createRoles,
-        handleResponse: async (response) => {
-          if (response.ok) {
-            logger.log(`Created permissions`)
-            logger.table(createRoles)
-            return await response.json()
-          } else {
-            logger.error("Error Creating Permissions")
-            logger.table(createRoles)
-            return []
-          }
-        },
+        permissions: createdPermissions,
+        successMessage: "Created Permissions",
+        failMessage: "Failed to create Permissions",
       })
     }
-  } catch (err) {
-    logger.error("Migration Failed: Are you sure there are changes to be made?", err)
+
+    if (updatedPermissions.length) {
+      await Promise.all(
+        updatedPermissions.map((permission) => {
+          const { id, ...data } = permission
+          return executePermissionAction({
+            action: update,
+            environment: target,
+            id,
+            permissions: data,
+            failMessage: `Failed to update Permissions ${id}`,
+          })
+        })
+      )
+      logger.log("Permissions Updated", permIDS(updatedPermissions))
+    }
+
+    if (deletedPermissions.length) {
+      await executePermissionAction({
+        action: remove,
+        environment: target,
+        permissions: permIDS(deletedPermissions),
+        successMessage: "Deleted Permissions",
+        failMessage: "Failed to delete Permissions",
+      })
+    }
   }
 }
