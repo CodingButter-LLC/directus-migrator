@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { AdminIds, Environment, DirectusMigratorCommand } from "./types/types"
 import { SchemaMigrator, PermissionMigrator, RoleMigrator } from "./migrators"
 import logger from "./utils/Logger"

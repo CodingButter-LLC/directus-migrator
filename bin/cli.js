@@ -3,6 +3,7 @@ const fs = require("fs")
 const path = require("path")
 const { DirectusMigrator } = require("../dist/index.js")
 const { args, usage } = require("./commands.config.js")
+
 const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
 let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : []
 

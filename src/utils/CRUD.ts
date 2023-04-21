@@ -49,6 +49,7 @@ export default async function CRUD({
     headers,
     body: data && JSON.stringify(data),
   })
+
   if (response.ok) {
     try {
       const jsonResp = await response.json()

@@ -46,6 +46,7 @@ export async function getRoleCategories(
   )
   return { createdRoles, deletedRoles, adminIds }
 }
+
 async function executeRoleAction({
   method,
   environment,
@@ -71,6 +72,7 @@ async function executeRoleAction({
   })
   return roleResponse
 }
+
 export async function migrate(source: Environment, target: Environment): Promise<AdminIds> {
   const { createdRoles, deletedRoles, adminIds } = await getRoleCategories(source, target)
   if (createdRoles.length > 0) {
