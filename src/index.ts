@@ -10,6 +10,7 @@ const migrateSchema = async (source: Environment, target: Environment, force: bo
   }
 }
 
+
 export async function migrateRoles(source: Environment, target: Environment): Promise<AdminIds> {
   return await RoleMigrator(source, target)
 }
@@ -27,19 +28,28 @@ export async function DirectusMigrator(
   target: Environment,
   args: DirectusMigratorCommand
 ) {
-  logger.setDebugLevel(args)
   const { force = false, roles, permissions, schema } = args
 
   if (roles || permissions || schema) {
-    if (schema) return await migrateSchema(source, target, force)
+    if (schema) {
+      logger.info("Migrating Schema Started")
+      return await migrateSchema(source, target, force)
+    }
+    logger.info("Migrating Roles")
     const adminIds = await migrateRoles(source, target)
-    logger.table(adminIds)
-    if (permissions) await migratePermissions(source, target, adminIds)
+    logger.info("Migrating Roles Complete")
+    if (permissions) {
+      logger.info("Migrating Permissions")
+      await migratePermissions(source, target, adminIds)
+      logger.info("Migrating Permissions Complete")
+    }
   } else {
+    logger.info("Migrating Schema")
     await migrateSchema(source, target, force)
+    logger.info("Migrating Roles")
     const adminIds = await migrateRoles(source, target)
+    logger.info("Migrating Permissions")
     await migratePermissions(source, target, adminIds)
   }
-
-  console.log("Completed!")
+  logger.info("Completed!")
 }

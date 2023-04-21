@@ -64,23 +64,22 @@ async function executePermissionAction({
   successMessage,
   failMessage,
 }: PermissionExecution) {
-  logger.log("", `Executing ${method} on ${environment.name}...`)
-  logger.log("", `Permissions: ${JSON.stringify(permissions, null, 4)}`)
+  logger.info("", `Executing ${method} on ${environment.name}...`)
+  logger.info("", `Permissions: ${JSON.stringify(permissions, null, 4)}`)
   const roleResponse = await CRUD({
     method,
     environment,
     path: `permissions${id ? `/${id}` : ""}`,
     data: permissions,
-    success: async (response: Response) => {
+    success: async (data:any) => {
       try {
-        const jsonResponse = await response.json()
-        successMessage && logger.log(successMessage(jsonResponse.data))
+        successMessage && logger.info(successMessage(data))
       } catch (err) {
         logger.error(err)
       }
     },
-    failure: async (response: Response) => {
-      failMessage && logger.error(failMessage(""))
+    failure: async (data) => {
+      failMessage && logger.error(failMessage(data))
     },
   })
   return roleResponse
@@ -102,7 +101,7 @@ export async function migrate(source: Environment, target: Environment, adminIds
       sourcePermissions,
       targetPermissions
     )
-    logger.table({
+    logger.verbose({
       Created: createdPermissions.length,
       Updated: updatedPermissions.length,
       Deleted: deletedPermissions.length,
@@ -131,7 +130,7 @@ export async function migrate(source: Environment, target: Environment, adminIds
           })
         })
       )
-      logger.log("Permissions Updated", updatedPermissions)
+      logger.info("Permissions Updated", updatedPermissions)
     }
 
     if (deletedPermissions.length) {

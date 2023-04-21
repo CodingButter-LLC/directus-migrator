@@ -55,7 +55,7 @@ async function executeRoleAction({
   successMessage,
   failMessage,
 }: RoleExecution) {
-  logger.log("", `Executing ${method} on ${environment.name}...`)
+  logger.info("", `Executing ${method} on ${environment.name}...`)
   const roleResponse = await CRUD({
     method,
     environment,
@@ -63,7 +63,7 @@ async function executeRoleAction({
     data: roles,
     success: async (response: Response) => {
       const jsonResponse = await response.json()
-      successMessage && logger.log(successMessage(jsonResponse.data))
+      successMessage && logger.info(successMessage(jsonResponse.data))
     },
     failure: async (response: Response) => {
       const jsonString = await response.json()

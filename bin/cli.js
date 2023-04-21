@@ -105,13 +105,21 @@ const getEnvironments = async (sourceName, targetName) => {
 }
 
 ;(async () => {
-  if (args?.init) return init()
-  if (args?.add) return await addEnvironment()
-  if (args?.help) return console.log(usage)
-  else {
+  if (args?.init) {
+    console.log("Initializing config...")
+    return init()
+  } else if (args?.add) {
+    console.log("Adding environment to config...")
+    return await addEnvironment()
+  } else if (args?.help) {
+    consolee.log("Showing help...")
+    return console.log(usage)
+  } else {
     if (currentConfig.length) {
+      console.log("Starting migration...")
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
       await DirectusMigrator(sourceConfig, targetConfig, args)
+      console.log("Migration finished!")
     }
   }
 })()

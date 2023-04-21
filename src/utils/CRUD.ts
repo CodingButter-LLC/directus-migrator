@@ -1,5 +1,4 @@
 import { Environment } from "../types/types"
-import logger from "./Logger"
 
 export enum Method {
   GET = "GET",
@@ -35,6 +34,18 @@ const URL = (environment: Environment, path: string, params: any) => {
   return url
 }
 
+async function handleStatus(response: Response,handler?:(data:any)=>any):Promise<any>{
+  if(!response.ok)return 
+  const contentType = response.headers.get("content-type");
+  let returnVal:any = null
+  if (contentType && contentType.indexOf("application/json") !== -1) {
+      returnVal = await response.json()
+    } else {
+      returnVal = await response.text()
+    }
+  return handler && handler(returnVal) || returnVal
+}
+
 export default async function CRUD({
   environment,
   path,
@@ -50,17 +61,5 @@ export default async function CRUD({
     body: data && JSON.stringify(data),
   })
 
-  if (response.ok) {
-    try {
-      const jsonResp = await response.json()
-      success && success(response)
-      return jsonResp
-    } catch (err) {
-      return await response.text()
-    }
-  } else {
-    failure && failure(response)
-    logger.warn("CRUD Failed", JSON.stringify(await response?.json(), null, 4))
-    return false
-  }
+  return response.ok?handleStatus(response,success):handleStatus(response,failure)
 }

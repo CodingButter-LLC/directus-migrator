@@ -25,12 +25,12 @@ export async function getSnapshot(environment: Environment) {
     environment,
     path: "schema/snapshot",
     success: async (response: Response) => {
-      logger.log("Schema Migration Snapshot Successful")
+      logger.info("Source Schema Snapshot Successful")
     },
     failure: async (response: Response) => {
       logger.warn(
         "Schema Migration Snapshot Failed",
-        JSON.stringify(await response?.json(), null, 4)
+        await response?.json()
       )
     },
   })
@@ -49,7 +49,7 @@ export async function getDiff(
     params: { force },
     data: snapshot,
     success: async (response: Response) => {
-      logger.log("Migration Diff Successful")
+      logger.info("Migration Diff Successful")
     },
     failure: async (response: Response) => {
       logger.warn("Migration Diff Failed", JSON.stringify(await response?.json(), null, 4))
@@ -64,10 +64,10 @@ export async function applyDiff(environment: Environment, diff: any) {
     path: "schema/apply",
     data: diff,
     success: async (response: Response) => {
-      logger.log("Migration Successful")
+      logger.info("Migration Successful")
     },
     failure: async (response: Response) => {
-      logger.log("Migration Failed", JSON.stringify(await response?.json(), null, 4))
+      logger.info("Migration Failed", JSON.stringify(await response?.json(), null, 4))
     },
   })
 }
