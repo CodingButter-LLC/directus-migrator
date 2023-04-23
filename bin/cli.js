@@ -1,18 +1,14 @@
-#!/usr/bin/env node
+const prompts = require("prompts")
 const fs = require("fs")
 const path = require("path")
-const args = require("args-parser")(process.argv)
-const prompts = require("prompts")
+const { DirectusMigrator } = require("../dist/index.js")
+const { args, usage } = require("./commands.config.js")
+const figlet = require("figlet")
 
-let logger
+const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
+let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : []
 
-const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.mjs")
-let currentConfig
 const addEnvironment = async () => {
-  if (!currentConfig) {
-    const config = await import(`file://${migrationConfigPath}`)
-    currentConfig = config.default
-  }
   const { name, endpoint, accessToken } = await prompts([
     {
       type: "text",
@@ -63,7 +59,7 @@ const addEnvironment = async () => {
     `const config = ${JSON.stringify(currentConfig, null, 2)}
  export default config`
   )
-  logger.log("Config updated!")
+  console.log("Config updated!")
   await addEnvQuestion()
 }
 
@@ -104,60 +100,34 @@ export default config`
 }
 
 const getEnvironments = async (sourceName, targetName) => {
-  const config = args?.config
-  const configPath = path.resolve(process.cwd(), config || "directus-migrator.config.mjs")
-  const configModule = await import(`file://${configPath}`)
-  const configArray = configModule.default
-  const sourceConfig = configArray.find((config) => config.name === sourceName)
-  const targetConfig = configArray.find((config) => config.name === targetName)
+  const sourceConfig = currentConfig.find((config) => config.name === sourceName)
+  const targetConfig = currentConfig.find((config) => config.name === targetName)
   return [sourceConfig, targetConfig]
 }
 
-const migrateSchema = async () => {
-  const directusMigrate = await import("../src/schema-migration.mjs")
-  try {
-    const { source, target } = args
-    const force = args?.force
-
-    const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-    await directusMigrate.migrate(args, sourceConfig, targetConfig, force)
-  } catch (e) {
-    logger.error("Error while migrating schema", { error: e })
-  }
-}
-
-const migrateRoles = async () => {
-  const directusMigrate = await import("../src/role-migration.mjs")
-  const { source, target } = args
-  const force = args?.force
-  const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-  return await directusMigrate.migrate(args, sourceConfig, targetConfig, force)
-}
-
-const migratePermissions = async (mergedRoles) => {
-  const directusMigrate = await import("../src/permission-migration.mjs")
-  const { source, target } = args
-  const force = args?.force
-  const [sourceConfig, targetConfig] = await getEnvironments(source, target)
-  await directusMigrate.migrate(args, sourceConfig, targetConfig, mergedRoles, force)
-}
 ;(async () => {
-  logImport = await import("../src/utils/Logger.mjs")
-  logger = logImport.default
-  logger.setDebugLevel(args)
-  let mergedRoles = []
-  if (args.init) return init()
-  if (args.add) return await addEnvironment()
-  else {
-    if (args.roles || args.permissions || args.schema) {
-      if (args.schema) return await migrateSchema()
-      mergedRoles = await migrateRoles()
-      if (args.permissions) return await migratePermissions(mergedRoles)
-    } else {
-      await migrateSchema()
-      mergedRoles = await migrateRoles()
-      await migratePermissions(mergedRoles)
+  if (args?.init) {
+    console.log("Initializing config...")
+    return init()
+  } else if (args?.add) {
+    console.log("Adding environment to config...")
+    return await addEnvironment()
+  } else if (args?.help) {
+    console.log("Showing help...")
+    return console.log(usage)
+  } else {
+    if (currentConfig.length) {
+      console.log(figlet.textSync("Directus\n  Migrator", {
+      horizontalLayout: "default",
+      verticalLayout: "fitted",
+      width: 120,
+      font: "ANSI Shadow",
+      whitespaceBreak: true,
+      }))
+      
+      const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
+      await DirectusMigrator(sourceConfig, targetConfig, args)
+      console.log("Migration finished!")
     }
   }
-  console.log("Completed!")
 })()

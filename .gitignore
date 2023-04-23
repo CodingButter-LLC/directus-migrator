@@ -118,6 +118,7 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+.turbo
 
 # yarn v2
 .yarn/cache
