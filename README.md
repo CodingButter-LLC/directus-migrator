@@ -89,7 +89,7 @@ Supported options
 > npx directus-migrator -argument[=value]
 
 | Name | Type | Description
-| :-: | :-: | :-: | :-: |
+| :-: | :-: | :-: |
 | `init` | 'flag' | Initialize config file
 | `force` | 'flag' |  Force migration between directus versions
 | `source` | 'string'   | Environment to migrate from
