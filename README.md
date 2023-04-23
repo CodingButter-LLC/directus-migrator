@@ -78,7 +78,7 @@ npx directus-migrator -s development -t production
 > If your environments are not on the exact same version of directus you may need to force the migration with the -force flag
 
 ```sh
-npx directus-migrator -force -source=development -target=staging
+npx directus-migrator -f -s development -t staging
 ```
 
 ## API
