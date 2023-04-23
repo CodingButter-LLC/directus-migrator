@@ -69,7 +69,7 @@ export default config
 ### Basic
 
 ```sh
-npx directus-migrator -source=development -target=staging
+npx directus-migrator -s development -t production
 ```
 
 ### Force Migration
