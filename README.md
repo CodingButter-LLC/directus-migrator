@@ -99,7 +99,6 @@ Supported options
 | `permissions` | 'flag' | display detailed console logs
 | `help` | 'flag' | display help menu
 
-## Authors 
 
 **CodingButter** - *Initial work* - [CodingButter](https://github.com/CodingButter-LLC)
 
