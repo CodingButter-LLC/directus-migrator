@@ -39,7 +39,7 @@ These instructions will explain how to use the basic directus-migrator command a
 No installation neccessary. just run the following command from within the project root
 
 ```sh
-$ npx directus-migrator -init
+npx directus-migrator -init
 ```
 
 ![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
@@ -69,7 +69,7 @@ export default config
 ### Basic
 
 ```sh
-$ npx directus-migrator -source=development -target=staging
+npx directus-migrator -source=development -target=staging
 ```
 
 ### Force Migration
@@ -77,28 +77,29 @@ $ npx directus-migrator -source=development -target=staging
 > If your environments are not on the exact same version of directus you may need to force the migration with the -force flag
 
 ```sh
-$ npx directus-migrator -force -source=development -target=staging
+npx directus-migrator -force -source=development -target=staging
 ```
 
 ## API
 
-Supported options 
+Supported options
 
 ### Options
 
 > npx directus-migrator -argument[=value]
 
-| Name | Type | Description 
+| Name | Type | Description
 | :-: | :-: | :-: | :-: |
-| `init` | 'flag' | Initialize config file 
+| `init` | 'flag' | Initialize config file
 | `force` | 'flag' |  Force migration between directus versions
-| `source` | 'string'   | Environment to migrate from 
+| `source` | 'string'   | Environment to migrate from
 | `target` | 'string'   | Environment to migrate to
-| `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ] 
+| `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ]
 | `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]
 | `permissions` | 'flag' | display detailed console logs
 | `help` | 'flag' | display help menu
 
+## Authors
 
 **CodingButter** - *Initial work* - [CodingButter](https://github.com/CodingButter-LLC)
 
