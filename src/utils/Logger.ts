@@ -24,7 +24,7 @@ const timestampOptions: TimestampOptions = process.env.NODE_ENV === 'development
 
 
 const myFormat = printf(({ level, message, label, timestamp }) => {
-  switch (level) {
+  /* switch (level) {
     case 'error':
       return `${timestamp} [${label}] ${level}: ${message}`
     case 'warn':
@@ -42,6 +42,8 @@ const myFormat = printf(({ level, message, label, timestamp }) => {
     default:
       return `${message}`
   }
+  */
+  return `${timestamp} [${label}] ${level}: ${message}`
 })
 
 
@@ -53,6 +55,7 @@ export class LogConfig {
     this._label = deviceLabel || 'unknown'
     this.logger = createLogger({
       levels,
+      level: process.env.LOGGING_LEVEL || 'silly',
       format: combine(
         colorize(),
         label({ label: this.label }),

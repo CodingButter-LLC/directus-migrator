@@ -1,7 +1,7 @@
 import { AdminIds, Environment, Permission, Role } from "../types/types"
 import CRUD, { Method } from "../utils/CRUD"
 import logger from "../utils/Logger.js"
-
+logger.level
 interface PermissionExecution {
   method: Method
   environment: Environment
@@ -11,7 +11,7 @@ interface PermissionExecution {
   failMessage?: (message: any) => string
 }
 
-function removeUnwantedPermissions(permissions: Permission[], adminId: string): Permission[] {
+async function removeUnwantedPermissions(permissions: Permission[], adminId: string): Promise<Permission[]> {
   return permissions.filter(({ role, id }) => role != adminId && id != null)
 }
 
@@ -22,7 +22,8 @@ function getPermissionAction(
   createdPermissions: Permission[]
   updatedPermissions: Permission[]
   deletedPermissions: Permission[]
-} {
+  } {
+  
   const createdPermissions = sourcePermissions.filter((sourcePermission) => {
     return !targetPermissions.find(({ id }) => sourcePermission.id === id)
   })
@@ -64,19 +65,13 @@ async function executePermissionAction({
   successMessage,
   failMessage,
 }: PermissionExecution) {
-  logger.info("", `Executing ${method} on ${environment.name}...`)
-  logger.info("", `Permissions: ${JSON.stringify(permissions, null, 4)}`)
   const roleResponse = await CRUD({
     method,
     environment,
     path: `permissions${id ? `/${id}` : ""}`,
     data: permissions,
     success: async (data:any) => {
-      try {
         successMessage && logger.info(successMessage(data))
-      } catch (err) {
-        logger.error(err)
-      }
     },
     failure: async (data) => {
       failMessage && logger.error(failMessage(data))
@@ -86,12 +81,13 @@ async function executePermissionAction({
 }
 
 export async function migrate(source: Environment, target: Environment, adminIds: AdminIds) {
-  const targetPermissions = removeUnwantedPermissions(
+  
+  const targetPermissions = await removeUnwantedPermissions(
     await getPermissions(target),
     adminIds.targetAdminId
   )
 
-  const sourcePermissions = removeUnwantedPermissions(
+  const sourcePermissions = await removeUnwantedPermissions(
     await getPermissions(source),
     adminIds.sourceAdminId
   )
@@ -101,11 +97,10 @@ export async function migrate(source: Environment, target: Environment, adminIds
       sourcePermissions,
       targetPermissions
     )
-    logger.verbose({
-      Created: createdPermissions.length,
-      Updated: updatedPermissions.length,
-      Deleted: deletedPermissions.length,
-    })
+
+    logger.info(
+`Created: ${createdPermissions.length}, Updated: ${updatedPermissions.length}, Deleted: ${deletedPermissions.length}`)
+    
     if (createdPermissions.length > 0) {
       await executePermissionAction({
         method: Method.POST,

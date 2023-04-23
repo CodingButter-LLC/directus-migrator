@@ -3,6 +3,7 @@ const fs = require("fs")
 const path = require("path")
 const { DirectusMigrator } = require("../dist/index.js")
 const { args, usage } = require("./commands.config.js")
+const figlet = require("figlet")
 
 const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
 let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : []
@@ -112,11 +113,18 @@ const getEnvironments = async (sourceName, targetName) => {
     console.log("Adding environment to config...")
     return await addEnvironment()
   } else if (args?.help) {
-    consolee.log("Showing help...")
+    console.log("Showing help...")
     return console.log(usage)
   } else {
     if (currentConfig.length) {
-      console.log("Starting migration...")
+      console.log(figlet.textSync("Directus\n  Migrator", {
+      horizontalLayout: "default",
+      verticalLayout: "fitted",
+      width: 120,
+      font: "ANSI Shadow",
+      whitespaceBreak: true,
+      }))
+      
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
       await DirectusMigrator(sourceConfig, targetConfig, args)
       console.log("Migration finished!")

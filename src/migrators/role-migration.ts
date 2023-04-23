@@ -81,7 +81,7 @@ export async function migrate(source: Environment, target: Environment): Promise
       roles: createdRoles,
       environment: target,
       successMessage: (roles: any) => `Created ${roles.length} Role/s`,
-      failMessage: (message: any) => `Failed to create roles ${message}`,
+      failMessage: (message: any) => `Failed to create roles\n ${message}`,
     })
   }
 
@@ -94,7 +94,7 @@ export async function migrate(source: Environment, target: Environment): Promise
           environment: target,
           id,
           successMessage: (roles: any) => `Deleted ${roles.length} Role/s`,
-          failMessage: (message: any) => `Failed to Delete roles \n${message}`,
+          failMessage: (message: any) => `Failed to Delete roles\n ${message}`,
         })
       })
     )

@@ -29,10 +29,12 @@ export async function DirectusMigrator(
   args: DirectusMigratorCommand
 ) {
   const { force = false, roles, permissions, schema } = args
-
+  if (!source || !target) {
+    logger.error("Source and Target Environments are required")
+    return
+  }
   if (roles || permissions || schema) {
     if (schema) {
-      logger.info("Migrating Schema Started")
       return await migrateSchema(source, target, force)
     }
     logger.info("Migrating Roles")
@@ -51,5 +53,6 @@ export async function DirectusMigrator(
     logger.info("Migrating Permissions")
     await migratePermissions(source, target, adminIds)
   }
+
   logger.info("Completed!")
 }

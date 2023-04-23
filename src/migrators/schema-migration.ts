@@ -7,16 +7,13 @@ export async function migrate(
   target: Environment,
   force?: boolean | undefined
 ) {
-  try {
+    logger.info("Migrating Schema Started")
     const snapshot = await getSnapshot(source)
     const diff = await getDiff(target, snapshot, force)
     if (!diff) return { status: "no changes" }
     const applied = await applyDiff(target, diff)
     if (!applied) return { status: "failed" }
     return { status: "success" }
-  } catch (err) {
-    logger.warn("Migration Failed: Are you sure there are changes to be made?", err)
-  }
 }
 
 export async function getSnapshot(environment: Environment) {
@@ -28,10 +25,7 @@ export async function getSnapshot(environment: Environment) {
       logger.info("Source Schema Snapshot Successful")
     },
     failure: async (response: Response) => {
-      logger.warn(
-        "Schema Migration Snapshot Failed",
-        await response?.json()
-      )
+      logger.warn(`Schema Migration Snapshot Failed ${await response?.json()}`)
     },
   })
   return data
@@ -52,7 +46,7 @@ export async function getDiff(
       logger.info("Migration Diff Successful")
     },
     failure: async (response: Response) => {
-      logger.warn("Migration Diff Failed", JSON.stringify(await response?.json(), null, 4))
+      logger.warn(`Migration Diff Failed ${await response?.json()}`)
     },
   })
 }
@@ -64,10 +58,10 @@ export async function applyDiff(environment: Environment, diff: any) {
     path: "schema/apply",
     data: diff,
     success: async (response: Response) => {
-      logger.info("Migration Successful")
+      logger.info("Schema Migration Successful")
     },
     failure: async (response: Response) => {
-      logger.info("Migration Failed", JSON.stringify(await response?.json(), null, 4))
+      logger.info(`Schema Migration Failed ${await response?.json()}`)
     },
   })
 }

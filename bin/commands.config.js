@@ -2,6 +2,7 @@ const commandLineArgs = require("command-line-args")
 const commandLineUsage = require("command-line-usage")
 const figlet = require("figlet")
 
+process.env.LOGGING_LEVEL = process.env.LOGGING_LEVL || "info"
 const optionDefinitions = [
   {
     name: "init",
@@ -39,20 +40,6 @@ const optionDefinitions = [
     optional: true,
   },
   {
-    name: "debug",
-    type: Boolean,
-    alias: "d",
-    description: "Enable debug mode",
-    optional: true,
-  },
-  {
-    name: "verbose",
-    type: Boolean,
-    alias: "v",
-    description: "Enable verbose mode",
-    optional: true,
-  },
-  {
     name: "help",
     type: Boolean,
     alias: "h",
@@ -80,6 +67,14 @@ const optionDefinitions = [
     description: "Migrate schema only",
     optional: true,
   },
+  {
+    name: "DEBUG_LEVEL",
+    type: String,
+    alias: "d",
+    description: "Set the logging level (debug, info, warn, error)",
+    optional: true,
+    defaultValue: "info",
+  }
 ]
 
 const usage = commandLineUsage([
