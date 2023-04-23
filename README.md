@@ -88,19 +88,18 @@ Supported options
 
 > npx directus-migrator -argument[=value]
 
-| Name | Type | Description | Implementation Status |
+| Name | Type | Description 
 | :-: | :-: | :-: | :-: |
-| `init` | 'flag' | Initialize config file | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `force` | 'flag' |  Force migration between directus versions | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `source` | 'string'   | Environment to migrate from | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `target` | 'string'   | Environment to migrate to | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `schema` | 'flag' | Only migrates schema [ can be combined with permissions and roles] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ] | ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]| ![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `debug` | 'flag' | display console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
-| `permissions` | 'flag' | display detailed console logs | ![](https://geps.dev/progress/50?dangerColor=800000&warningColor=ff9900&successColor=006600)
+| `init` | 'flag' | Initialize config file 
+| `force` | 'flag' |  Force migration between directus versions
+| `source` | 'string'   | Environment to migrate from 
+| `target` | 'string'   | Environment to migrate to
+| `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ] 
+| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]
+| `permissions` | 'flag' | display detailed console logs
+| `help` | 'flag' | display help menu
 
-## Authors
+## Authors 
 
 **CodingButter** - *Initial work* - [CodingButter](https://github.com/CodingButter-LLC)
 
