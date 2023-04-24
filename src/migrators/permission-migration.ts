@@ -1,5 +1,7 @@
 import { AdminIds, Environment, Permission, Role } from "../types/types"
 import CRUD, { Method } from "../utils/CRUD"
+import { DeepCompareJson } from "../utils/Compare"
+
 import logger from "../utils/Logger.js"
 logger.level
 interface PermissionExecution {
@@ -28,10 +30,20 @@ function getPermissionAction(
     return !targetPermissions.find(({ id }) => sourcePermission.id === id)
   })
 
-  const updatedPermissions = sourcePermissions.filter((sourcePermission) => {
+  const updatedPermissionsCandidates = sourcePermissions.filter((sourcePermission) => {
     return targetPermissions.find(({ id }) => sourcePermission.id === id)
+  }).map((sourcePermission) => {
+    return {
+      sourcePermission,
+      targetPermission: targetPermissions.find(({ id }) => sourcePermission.id === id),
+    }
   })
-
+  
+  //use deep compare to check if the permissions are the same
+  const updatedPermissions = updatedPermissionsCandidates.filter(({ sourcePermission, targetPermission }) => {
+    return !DeepCompareJson(sourcePermission, targetPermission)
+  }).map(({ sourcePermission }) => sourcePermission)
+  
   const deletedPermissions = targetPermissions.filter((targetPermission) => {
     return !sourcePermissions.find(({ id }) => {
       return id === targetPermission.id
