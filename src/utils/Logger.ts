@@ -76,7 +76,7 @@ export class LogConfig {
 
     return createLogger({
       levels,
-      level: process.env.LOG_LEVEL || "error",
+      level: process.env.LOG_LEVEL || "debug",
       format: combine(
         colorize(),
         label({ label: this.label }),
