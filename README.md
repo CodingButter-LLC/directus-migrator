@@ -42,7 +42,8 @@ No installation neccessary. just run the following command from within the proje
 npx directus-migrator -init
 ```
 
-![directus-migrator -init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
+![cli-init](https://user-images.githubusercontent.com/10267569/233826675-6936664f-e11f-49a3-8c1f-2391e83e6d1b.jpg)
+
 
 ### directus-migrator.config.mjs
 
@@ -77,7 +78,7 @@ npx directus-migrator -s development -t production
 > If your environments are not on the exact same version of directus you may need to force the migration with the -force flag
 
 ```sh
-npx directus-migrator -force -source=development -target=staging
+npx directus-migrator -f -s development -t staging
 ```
 
 ## API
