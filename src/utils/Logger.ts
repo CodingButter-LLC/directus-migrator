@@ -1,27 +1,44 @@
-import { createLogger, format, transports, Logger } from 'winston'
-import { PrettyPrintOptions, TimestampOptions } from 'logform'
-import { hostname } from 'os'
-import exec from 'child_process'
+import { createLogger, format, transports, Logger, transport } from "winston";
+import { TimestampOptions } from "logform";
+import { hostname } from "os";
+import exec from "child_process";
 
-const ghEmail:string|undefined = exec.execSync('git config --global user.email')?.toString()?.trim()
-const deviceLabel:string = ghEmail?.includes('@') ? ghEmail : hostname() || `${process.env.NODE_ENV}`
-const { printf, combine, timestamp, label, prettyPrint,colorize } = format
+const { printf, combine, timestamp, label, prettyPrint, colorize } = format;
 
-export const levels = {
-    error  : 0,
-    warn   : 1,
-    info   : 2,
-    http   : 3,
-    verbose: 4,
-    debug  : 5
+let deviceLabel: string | undefined =
+  process.env.DEVICE_LABEL || process.env.NODE_ENV;
+
+try {
+  const ghEmail: string | undefined = exec
+    .execSync("git config --global user.email")
+    ?.toString()
+    ?.trim();
+  const ghUser: string | undefined = exec
+    .execSync("git config --global user.name")
+    ?.toString()
+    ?.trim();
+  deviceLabel = ghEmail?.includes("@")
+    ? `git:${ghEmail}`
+    : ghUser.length
+    ? `git:${ghUser}`
+    : hostname() || deviceLabel;
+} catch (e) {
+  // do nothing
 }
 
+export const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  verbose: 4,
+  debug: 5,
+};
 
-
-const timestampOptions: TimestampOptions = process.env.NODE_ENV === 'development' ?
-  {format : 'YYYY-MM-DD HH:mm:ss'} : {format: 'YYYY-MM-DD'}
-    
-
+const timestampOptions: TimestampOptions =
+  process.env.NODE_ENV === "development"
+    ? { format: "YYYY-MM-DD HH:mm:ss" }
+    : { format: "YYYY-MM-DD" };
 
 const myFormat = printf(({ level, message, label, timestamp }) => {
   /* switch (level) {
@@ -43,49 +60,68 @@ const myFormat = printf(({ level, message, label, timestamp }) => {
       return `${message}`
   }
   */
-  return `${timestamp} [${label}] ${level}: ${message}`
-})
-
+  return `${timestamp} [${label}] ${level}: ${message}`;
+});
 
 export class LogConfig {
-  private _label: string
-  public logger: Logger
-  private _format: typeof printf = printf
+  private _label: string;
+  public logger: Logger;
+  private _format: typeof printf = printf;
+  public errorLogFile: string | undefined = process.env.ERROR_LOG_FILE;
+  public infoLogFile: string | undefined = process.env.INFO_LOG_FILE;
   constructor() {
-    this._label = deviceLabel || 'unknown'
-    this.logger = createLogger({
+    this._label = deviceLabel || "unknown";
+    this.logger = this.createLogger();
+  }
+  setLogger(_logger: Logger) {
+    this.logger = _logger;
+  }
+  createLogger() {
+    const loggerTransports: transport[] = [
+      new transports.Console({ level: "debug" }),
+    ];
+
+    if (this.errorLogFile) {
+      loggerTransports.push(
+        new transports.File({ filename: "error.log", level: "error" })
+      );
+    }
+    if (this.infoLogFile) {
+      loggerTransports.push(
+        new transports.File({ filename: "info.log", level: "info" })
+      );
+    }
+
+    return createLogger({
       levels,
-      level: process.env.LOGGING_LEVEL || 'silly',
       format: combine(
         colorize(),
         label({ label: this.label }),
         timestamp(timestampOptions),
         myFormat
       ),
-      transports: [
-        new transports.Console({ level: 'debug' }),
-        new transports.File({ filename: 'error.log', level: 'error' }),
-        new transports.File({ filename: 'info.log', level: 'info' })
-      ]
-    })
+      transports: loggerTransports,
+    });
   }
 
   set format(fm: typeof printf) {
-    this._format = fm
+    this._format = fm;
+    this.logger = this.createLogger();
   }
-  
+
   get format(): typeof printf {
-    return this._format
+    return this._format;
   }
 
   get label() {
-    return this._label
+    return this._label;
   }
   set label(deviceLabel: string) {
-    this._label = deviceLabel
+    this._label = deviceLabel;
+    this.logger = this.createLogger();
   }
 }
 
-const logger = new LogConfig().logger
+const logger = new LogConfig().logger;
 
-export default logger
+export default logger;

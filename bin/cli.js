@@ -127,7 +127,6 @@ const getEnvironments = async (sourceName, targetName) => {
       
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
       await DirectusMigrator(sourceConfig, targetConfig, args)
-      console.log("Migration finished!")
     }
   }
 })()
