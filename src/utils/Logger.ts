@@ -3,7 +3,7 @@ import { TimestampOptions } from "logform";
 import { hostname } from "os";
 import exec from "child_process";
 
-const { printf, combine, timestamp, label, prettyPrint, colorize } = format;
+const { printf, combine, timestamp, label, colorize } = format;
 
 let deviceLabel: string | undefined =
   process.env.DEVICE_LABEL || process.env.NODE_ENV;
@@ -40,28 +40,10 @@ const timestampOptions: TimestampOptions =
     ? { format: "YYYY-MM-DD HH:mm:ss" }
     : { format: "YYYY-MM-DD" };
 
-const myFormat = printf(({ level, message, label, timestamp }) => {
-  /* switch (level) {
-    case 'error':
-      return `${timestamp} [${label}] ${level}: ${message}`
-    case 'warn':
-      return `${timestamp} [${label}] ${level}: ${message}`
-    case 'info':
-      return `${timestamp} [${label}] ${level}: ${message}`
-    case 'http':
-      return `${timestamp} [${label}] ${level}: ${message}`
-    case 'verbose':
-      return `${level}: ${message}`
-    case 'debug':
-      return `${level}: ${message}`
-    case 'silly':
-      return `${message}`
-    default:
-      return `${message}`
-  }
-  */
-  return `${timestamp} [${label}] ${level}: ${message}`;
-});
+const myFormat = printf(
+  ({ level, message, label, timestamp }) =>
+    `${timestamp} [${label}] ${level}: ${message}`
+);
 
 export class LogConfig {
   private _label: string;
@@ -78,7 +60,7 @@ export class LogConfig {
   }
   createLogger() {
     const loggerTransports: transport[] = [
-      new transports.Console({ level: "debug" }),
+      new transports.Console({ level: process.env.LOG_LEVEL || "debug" }),
     ];
 
     if (this.errorLogFile) {
@@ -94,6 +76,7 @@ export class LogConfig {
 
     return createLogger({
       levels,
+      level: process.env.LOG_LEVEL || "error",
       format: combine(
         colorize(),
         label({ label: this.label }),

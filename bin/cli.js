@@ -6,7 +6,7 @@ const { args, usage } = require("./commands.config.js")
 const figlet = require("figlet")
 
 const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
-let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : []
+let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : {}
 
 const addEnvironment = async () => {
   const { name, endpoint, accessToken } = await prompts([
@@ -53,10 +53,10 @@ const addEnvironment = async () => {
       },
     },
   ])
-  currentConfig = [...currentConfig, { name, endpoint, accessToken }]
+  currentConfig = { ...currentConfig, environments: [...currentConfig.environments, { name, endpoint, accessToken }] }
   fs.writeFileSync(
     migrationConfigPath,
-    `const config = ${JSON.stringify(currentConfig, null, 2)}
+    `const config = ${JSON.stringify(currentConfig, null, 4)}
  export default config`
   )
   console.log("Config updated!")
@@ -93,15 +93,15 @@ const init = async () => {
   }
   fs.writeFileSync(
     migrationConfigPath,
-    `const config = [];
+    `const config = {environments: []};
 export default config`
   )
   await addEnvQuestion()
 }
 
 const getEnvironments = async (sourceName, targetName) => {
-  const sourceConfig = currentConfig.find((config) => config.name === sourceName)
-  const targetConfig = currentConfig.find((config) => config.name === targetName)
+  const sourceConfig = currentConfig?.environments?.find((config) => config.name === sourceName)
+  const targetConfig = currentConfig?.environments?.find((config) => config.name === targetName)
   return [sourceConfig, targetConfig]
 }
 
@@ -116,7 +116,7 @@ const getEnvironments = async (sourceName, targetName) => {
     console.log("Showing help...")
     return console.log(usage)
   } else {
-    if (currentConfig.length) {
+    if (currentConfig?.environments?.length) {
       console.log(figlet.textSync("Directus\n  Migrator", {
       horizontalLayout: "default",
       verticalLayout: "fitted",
