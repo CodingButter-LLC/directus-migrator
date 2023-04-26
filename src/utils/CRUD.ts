@@ -19,8 +19,6 @@ export interface CRUDInterface {
   handleResponse?: (response: Response) => Promise<any>;
   params?: any;
   method: Method;
-  success?: (response: Response) => Promise<any>;
-  failure?: (response: Response) => Promise<any>;
 }
 
 const URL = (environment: Environment, path: string, params: any) => {
@@ -35,19 +33,11 @@ const URL = (environment: Environment, path: string, params: any) => {
   return url;
 };
 
-async function handleStatus(
-  response: Response,
-  handler?: (data: any) => any
-): Promise<any> {
-  if (!response.ok) return;
-  const contentType = response.headers.get("content-type");
-  let returnVal: any = null;
-  if (contentType && contentType.indexOf("application/json") !== -1) {
-    returnVal = await response.json();
-  } else {
-    returnVal = await response.text();
-  }
-  return (handler && handler(returnVal)) || returnVal;
+export function logErrors(errors: any[]) {
+  errors.forEach((error) => {
+    logger.error(error);
+  });
+  process.exit();
 }
 
 export default async function CRUD({
@@ -56,8 +46,6 @@ export default async function CRUD({
   data,
   params,
   method = Method.GET,
-  success,
-  failure,
 }: CRUDInterface): Promise<any> {
   const url = URL(environment, path, params);
   logger.debug(JSON.stringify({ url, method, data }));
@@ -66,8 +54,15 @@ export default async function CRUD({
     headers,
     body: data && JSON.stringify(data),
   });
-
-  return response.ok
-    ? handleStatus(response, success)
-    : handleStatus(response, failure);
+  //check if response status is empty
+  if (response.status === 204) return false;
+  try {
+    const json = await response.json();
+    if (json.errors) {
+      logErrors(json.errors);
+    }
+    return json;
+  } catch (e) {
+    logErrors([e]);
+  }
 }

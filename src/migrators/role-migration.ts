@@ -7,8 +7,8 @@ export interface RoleExecution {
   environment: Environment;
   roles?: Partial<Role[]> | Partial<Role>;
   id?: string;
-  successMessage?: (message: any) => string;
-  failMessage?: (message: any) => string;
+  successMessage: (message: any) => string;
+  failMessage: (message: any) => string;
 }
 
 export async function migrate(
@@ -58,13 +58,15 @@ export function removeAdmin(roles: Role[]): [roles: Role[], adminId: string] {
 }
 
 export async function getRoles(environment: Environment) {
-  const { data }: { data: Role[] } = await CRUD({
+  const roleResponse = await CRUD({
     method: Method.GET,
     environment,
     path: "roles",
   });
+  if (!roleResponse)
+    throw new Error(`Failed to retrieve Roles from ${environment.name}`);
   logger.info(`Retrieved Roles from ${environment.name}`);
-  return data;
+  return roleResponse?.data;
 }
 
 export async function getRoleCategories(
@@ -108,14 +110,8 @@ async function executeRoleAction({
     environment,
     path: `roles${id ? `/${id}` : ""}`,
     data: roles,
-    success: async (response: Response) => {
-      const jsonResponse = await response?.json();
-      successMessage && logger.info(successMessage(jsonResponse?.data));
-    },
-    failure: async (response: Response) => {
-      const jsonString = await response.json();
-      failMessage && logger.error(failMessage(jsonString));
-    },
   });
-  return roleResponse;
+  if (!roleResponse) throw new Error(failMessage(roleResponse));
+  logger.info(successMessage(roleResponse.data));
+  return roleResponse.data;
 }

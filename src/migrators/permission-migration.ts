@@ -1,25 +1,42 @@
 import { AdminIds, Environment, Permission, Role } from "../types/types";
 import CRUD, { Method } from "../utils/CRUD";
 import { DeepCompareJson } from "../utils/Compare";
-
 import logger from "../utils/Logger.js";
-logger.level;
+
 interface PermissionExecution {
   method: Method;
   environment: Environment;
-  permissions?: Partial<Permission[]> | Partial<Permission> | number[];
-  id?: number;
-  successMessage?: (message: any) => string;
-  failMessage?: (message: any) => string;
+  permissions?:
+    | Partial<Permission[]>
+    | Partial<Permission>
+    | number[]
+    | number
+    | undefined;
+  id?: number | undefined;
+  successMessage: (message: any) => string;
+  failMessage: (message: any) => string;
 }
 
-async function removeUnwantedPermissions(
+function filterAndMutatePermissions(
   permissions: Permission[],
   adminId: string
-): Promise<Permission[]> {
-  return permissions.filter(({ role, id }) => role != adminId && id != null);
+): Permission[] {
+  const filteredPermissions = permissions.filter(
+    ({ role, id }) => role != adminId && id != null
+  );
+  filteredPermissions.forEach((permission) => {
+    permission.uid = `${permission.role}${permission.collection}${permission.action}`;
+  });
+  return filteredPermissions;
 }
 
+/**
+ *
+ * @param sourcePermissions
+ * @param targetPermissions
+ * @returns { createdPermissions: Permission[], updatedPermissions: Permission[], deletedPermissions: Permission[]}
+ * @description Compares the permissions from the source and target using the uid(compiled from unique keys) environments and returns the permissions that need to be created, updated and deleted
+ */
 function getPermissionAction(
   sourcePermissions: Permission[],
   targetPermissions: Permission[]
@@ -28,19 +45,26 @@ function getPermissionAction(
   updatedPermissions: Permission[];
   deletedPermissions: Permission[];
 } {
-  const createdPermissions = sourcePermissions.filter((sourcePermission) => {
-    return !targetPermissions.find(({ id }) => sourcePermission.id === id);
-  });
+  const createdPermissions = sourcePermissions
+    .filter((sourcePermission) => {
+      return !targetPermissions.find(
+        ({ uid }) => sourcePermission?.uid === uid
+      );
+    })
+    .map((sourcePermission) => {
+      const { uid, id, ...permission } = sourcePermission;
+      return permission;
+    });
 
   const updatedPermissionsCandidates = sourcePermissions
     .filter((sourcePermission) => {
-      return targetPermissions.find(({ id }) => sourcePermission.id === id);
+      return targetPermissions.find(({ uid }) => sourcePermission.uid === uid);
     })
     .map((sourcePermission) => {
       return {
         sourcePermission,
         targetPermission: targetPermissions.find(
-          ({ id }) => sourcePermission.id === id
+          ({ uid }) => sourcePermission.uid === uid
         ),
       };
     });
@@ -48,13 +72,30 @@ function getPermissionAction(
   //use deep compare to check if the permissions are the same
   const updatedPermissions = updatedPermissionsCandidates
     .filter(({ sourcePermission, targetPermission }) => {
-      return !DeepCompareJson(sourcePermission, targetPermission);
+      const {
+        uid: sourceUID,
+        id: sourceID,
+        ...sourcePermissionWithoutID
+      } = sourcePermission;
+      const {
+        uid: targetUID,
+        id: targetID,
+        ...targetPermissionWithoutID
+      } = targetPermission || { uuid: null, id: null };
+      return !DeepCompareJson(
+        sourcePermissionWithoutID,
+        targetPermissionWithoutID
+      );
     })
-    .map(({ sourcePermission }) => sourcePermission);
+    .map(({ sourcePermission, targetPermission }) => {
+      const { uid, id: sourceId, ...permission } = sourcePermission;
+      const id = targetPermission?.id;
+      return { ...permission, id };
+    });
 
   const deletedPermissions = targetPermissions.filter((targetPermission) => {
-    return !sourcePermissions.find(({ id }) => {
-      return id === targetPermission.id;
+    return !sourcePermissions.find(({ uid }) => {
+      return uid === targetPermission.uid;
     });
   });
 
@@ -72,6 +113,7 @@ async function getPermissions(environment: Environment) {
       limit: -1,
     },
   });
+
   const publicPerms = await CRUD({
     method: Method.GET,
     environment,
@@ -82,6 +124,7 @@ async function getPermissions(environment: Environment) {
       limit: -1,
     },
   });
+
   return [...privatePerms?.data, ...publicPerms?.data];
 }
 
@@ -98,14 +141,9 @@ async function executePermissionAction({
     environment,
     path: `permissions${id ? `/${id}` : ""}`,
     data: permissions,
-    success: async (data: any) => {
-      successMessage && logger.info(successMessage(data));
-    },
-    failure: async (data) => {
-      failMessage && logger.error(failMessage(data));
-    },
   });
-  return roleResponse;
+  logger.info(successMessage(roleResponse.data));
+  return roleResponse.data;
 }
 
 export async function migrate(
@@ -115,12 +153,12 @@ export async function migrate(
 ) {
   logger.info("Migrating Permissions");
 
-  const targetPermissions = await removeUnwantedPermissions(
+  const targetPermissions = filterAndMutatePermissions(
     await getPermissions(target),
     adminIds.targetAdminId
   );
 
-  const sourcePermissions = await removeUnwantedPermissions(
+  const sourcePermissions = filterAndMutatePermissions(
     await getPermissions(source),
     adminIds.sourceAdminId
   );
@@ -140,8 +178,7 @@ export async function migrate(
         permissions: createdPermissions,
         successMessage: (_data: any[]) =>
           `Created ${createdPermissions.length} Permission/s`,
-        failMessage: (message: any) =>
-          `Failed to create Permission: ${message}`,
+        failMessage: (_response: any) => `Failed to create Permission`,
       });
     }
 
@@ -156,24 +193,25 @@ export async function migrate(
             id,
             successMessage: (_data?: any) =>
               `Updated Permission ${index} with id:${id}`,
-            failMessage: (message: any) =>
-              `Failed to Update Permission: ${message}`,
+            failMessage: (_response: any) =>
+              `Failed to Update Permission ${index} with id:${id}`,
           });
         })
       );
-      logger.info("Permissions Updated", updatedPermissions);
+      logger.info(`Updated ${updatedPermissions.length} Permissions`);
+      return true;
     }
 
     if (deletedPermissions.length) {
-      const ids = deletedPermissions.map(({ id }) => id);
+      const ids = deletedPermissions.map(({ id }) => id) as number[];
       await executePermissionAction({
         method: Method.DELETE,
         environment: target,
-        permissions: ids,
-        successMessage: (permissions: any) =>
-          `Deleted ${permissions.length} Permission/s`,
-        failMessage: (message: any) =>
-          `Failed to Delete Permission: ${message}`,
+        id: ids.length === 1 ? ids[0] : undefined,
+        permissions: ids.length > 1 ? ids : undefined,
+        successMessage: (_data: any[]) => `Deleted ${ids.length} Permission/s`,
+        failMessage: (_response: any) =>
+          `Failed to delete ${ids.length} Permission/s`,
       });
     }
   }

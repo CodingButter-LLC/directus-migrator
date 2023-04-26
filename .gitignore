@@ -127,3 +127,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 pnpm-lock.yaml
+directus-migrator.config.js

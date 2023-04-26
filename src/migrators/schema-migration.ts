@@ -13,30 +13,30 @@ export async function migrate(
     logger.error("Schema Migration Snapshot Failed");
     return;
   }
+
   const diff = await getDiff(target, snapshot, force);
-  if (!diff) logger.warn("No Schema Diff Found");
+  if (!diff) {
+    logger.warn("No Schema Diff Found");
+    return;
+  }
   const applied = await applyDiff(target, diff);
   if (!applied) {
     logger.error("Schema Migration Failed");
     return;
   }
+
   logger.info("Schema Migration Successful");
   return;
 }
 
 export async function getSnapshot(environment: Environment) {
-  const snapshot = await CRUD({
+  const snapShot = await CRUD({
     method: Method.GET,
     environment,
     path: "schema/snapshot",
-    success: async (response: Response) => {
-      logger.info("Source Schema Snapshot Successful");
-    },
-    failure: async (response: Response) => {
-      logger.warn(`Schema Migration Snapshot Failed ${await response?.json()}`);
-    },
   });
-  return snapshot?.data;
+  logger.info("Schema Migration Snapshot Successful");
+  return snapShot?.data;
 }
 
 export async function getDiff(
@@ -44,19 +44,16 @@ export async function getDiff(
   snapshot: any,
   force?: boolean | undefined
 ) {
-  return await CRUD({
+  const diff = await CRUD({
     method: Method.POST,
     environment,
     path: "schema/diff",
     params: { force },
     data: snapshot,
-    success: async (response: Response) => {
-      logger.info("Migration Diff Successful");
-    },
-    failure: async (response: Response) => {
-      logger.warn(`Migration Diff Failed ${await response?.json()}`);
-    },
   });
+
+  logger.info("Schema Migration Diff Successful");
+  return diff?.data || diff;
 }
 
 export async function applyDiff(environment: Environment, diff: any) {
@@ -65,11 +62,5 @@ export async function applyDiff(environment: Environment, diff: any) {
     environment,
     path: "schema/apply",
     data: diff,
-    success: async (response: Response) => {
-      logger.info("Schema Migration Successful");
-    },
-    failure: async (response: Response) => {
-      logger.warn(`Schema Migration Failed ${await response?.json()}`);
-    },
   });
 }
