@@ -8,7 +8,13 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "test": "npx ts-jest ./dist"
+    "migrate:dev:prod": "node bin/index.js -f -s development - t production",
+    "migrate:dev:staging": "node bin/index.js -f -s development -t staging",
+    "migrate:staging:prod": "node bin/index.js -f -s staging -t production",
+    "mds": "node bin/index.js -f -s development -t staging",
+    "mdp": "node bin/index.js -f -s development -t production",
+    "mps": "node bin/index.js -f -s production -t staging",
+    "msp": "node bin/index.js -f -s staging -t production"
   },
   "keywords": [],
   "author": "",
