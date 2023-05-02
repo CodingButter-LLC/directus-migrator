@@ -1,6 +1,6 @@
 {
   "name": "directus-migrator",
-  "version": "1.4.14",
+  "version": "1.4.15",
   "description": "",
   "main": "dist/index.js",
   "bin": {
