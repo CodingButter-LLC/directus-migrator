@@ -49,7 +49,7 @@ export default async function CRUD({
   method = Method.GET,
 }: CRUDInterface): Promise<any> {
   const url = URL(environment, path, params)
-  logger.warn(JSON.stringify({ url, method, data }))
+  logger.debug(JSON.stringify({ url, method, data }))
   const response = await fetch(url, {
     method,
     headers,
