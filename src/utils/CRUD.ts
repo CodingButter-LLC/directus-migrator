@@ -64,6 +64,6 @@ export default async function CRUD({
     }
     return json
   } catch (e) {
-    logErrors([e])
+    logErrors([e], url)
   }
 }

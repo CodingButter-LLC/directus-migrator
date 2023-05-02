@@ -53,9 +53,11 @@ export class LogConfig {
     this._label = deviceLabel || "unknown"
     this.logger = this.createLogger()
   }
+
   setLogger(_logger: Logger) {
     this.logger = _logger
   }
+
   createLogger() {
     const loggerTransports: transport[] = [
       new transports.Console({ level: process.env.LOG_LEVEL || "info" }),
@@ -64,12 +66,13 @@ export class LogConfig {
     if (this.errorLogFile) {
       loggerTransports.push(new transports.File({ filename: "error.log", level: "error" }))
     }
+
     if (this.infoLogFile) {
       loggerTransports.push(new transports.File({ filename: "info.log", level: "info" }))
     }
+
     return createLogger({
       levels,
-      level: process.env.LOG_LEVEL || "info",
       format: combine(
         colorize(),
         label({ label: this.label }),
