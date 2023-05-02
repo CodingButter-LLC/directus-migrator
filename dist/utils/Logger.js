@@ -41,7 +41,6 @@ class LogConfig {
         this._format = printf;
         this.errorLogFile = process.env.ERROR_LOG_FILE;
         this.infoLogFile = process.env.INFO_LOG_FILE;
-        console.log(`log level: ${process.env.LOG_LEVEL}`);
         this._label = deviceLabel || "unknown";
         this.logger = this.createLogger();
     }
