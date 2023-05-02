@@ -44,7 +44,7 @@ exports.logErrors = logErrors;
 function CRUD({ environment, path, data, params, method = Method.GET, }) {
     return __awaiter(this, void 0, void 0, function* () {
         const url = URL(environment, path, params);
-        Logger_1.default.debug(JSON.stringify({ url, method, data }));
+        Logger_1.default.warn(JSON.stringify({ url, method, data }));
         const response = yield fetch(url, {
             method,
             headers,
