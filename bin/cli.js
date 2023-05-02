@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const prompts = require("prompts")
 const fs = require("fs")
 const path = require("path")
@@ -53,7 +54,10 @@ const addEnvironment = async () => {
       },
     },
   ])
-  currentConfig = { ...currentConfig, environments: [...currentConfig.environments, { name, endpoint, accessToken }] }
+  currentConfig = {
+    ...currentConfig,
+    environments: [...currentConfig.environments, { name, endpoint, accessToken }],
+  }
   fs.writeFileSync(
     migrationConfigPath,
     `const config = ${JSON.stringify(currentConfig, null, 4)}
@@ -117,14 +121,16 @@ const getEnvironments = async (sourceName, targetName) => {
     return console.log(usage)
   } else {
     if (currentConfig?.environments?.length) {
-      console.log(figlet.textSync("Directus\n  Migrator", {
-      horizontalLayout: "default",
-      verticalLayout: "fitted",
-      width: 120,
-      font: "ANSI Shadow",
-      whitespaceBreak: true,
-      }))
-      
+      console.log(
+        figlet.textSync("Directus\n  Migrator", {
+          horizontalLayout: "default",
+          verticalLayout: "fitted",
+          width: 120,
+          font: "ANSI Shadow",
+          whitespaceBreak: true,
+        })
+      )
+
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
       await DirectusMigrator(sourceConfig, targetConfig, args)
     }
