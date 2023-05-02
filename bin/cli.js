@@ -133,8 +133,10 @@ const getEnvironments = async (sourceName, targetName) => {
 
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
       await DirectusMigrator(sourceConfig, targetConfig, args)
-    }else{
-      console.log(`No environments found. Please run ${"directus-migrator --init"} to initialize the config.``)
+    } else {
+      console.log(
+        `No environments found. Please run ${"directus-migrator --init"} to initialize the config.`
+      )
     }
   }
 })()
