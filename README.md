@@ -45,7 +45,7 @@ npx directus-migrator -init
 ![cli-init](https://user-images.githubusercontent.com/10267569/233826675-6936664f-e11f-49a3-8c1f-2391e83e6d1b.jpg)
 
 
-### directus-migrator.config.mjs
+### directus-migrator.config.js
 
 example
 
@@ -89,18 +89,21 @@ Supported options
 
 ### Options
 
-> npx directus-migrator -argument [value]
+> npx directus-migrator --argument [value]
 
-| Name | Type | Description
-| :-: | :-: | :-: |
-| `init` | 'flag' | Initialize config file
-| `force` | 'flag' |  Force migration between directus versions
-| `source` | 'string'   | Environment to migrate from
-| `target` | 'string'   | Environment to migrate to
-| `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ]
-| `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]
-| `schema` | 'flag' | Only migrate permissions [ can be combined with roles and permissions ]
-| `help` | 'flag' | display help menu
+when adding boolean flags make sure to use ```--fullFlagName``` or 
+```-alias```  (eg. --init or -i)
+
+| Name | Type | usage | Description
+| :-: | :-: | :-: | :-:
+| `init`        | boolean | ```--init or -i```        | Initialize config file
+| `force`       | boolean | ```--force or -f```       | Force migration between directus versions
+| `roles`       | boolean | ```--roles or -r```       | Only migrates roles [ can be combined with permissions and schema ]
+| `permissions` | boolean | ```--permissions or -p``` | Only migrate permissions [ can be combined with roles and schema ]
+| `schema`      | boolean | ```--schema or -c```      | Only migrate permissions [ can be combined with roles and permissions ]
+| `help`        | boolean | ```--help or -h```        | Display help menu
+| `source`      | string  | ```--source envname or -s envname``` | Environment to migrate from
+| `target`      | string  | ```--target envname or -t envname``` | Environment to migrate to
 
 ## Authors
 

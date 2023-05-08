@@ -9,6 +9,7 @@ const optionDefinitions = [
     type: Boolean,
     alias: "i",
     description: "Initialize the config",
+    default: false,
     optional: true,
   },
   {
@@ -66,14 +67,6 @@ const optionDefinitions = [
     alias: "c",
     description: "Migrate schema only",
     optional: true,
-  },
-  {
-    name: "DEBUG_LEVEL",
-    type: String,
-    alias: "d",
-    description: "Set the logging level (debug, info, warn, error)",
-    optional: true,
-    defaultValue: "info",
   }
 ]
 
@@ -102,7 +95,6 @@ const usage = commandLineUsage([
 const args = commandLineArgs(optionDefinitions, {
   helpArg: "help",
   partial: true,
-  argv: process.argv,
 })
 
 module.exports = { args, usage }

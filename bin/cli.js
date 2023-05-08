@@ -5,9 +5,8 @@ const path = require("path")
 const { DirectusMigrator } = require("../dist/index.js")
 const { args, usage } = require("./commands.config.js")
 const figlet = require("figlet")
-
 const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
-let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : {}
+let currentConfig = fs.existsSync(migrationConfigPath) ? require(migrationConfigPath) : {environments: []}
 
 const addEnvironment = async () => {
   const { name, endpoint, accessToken } = await prompts([
@@ -16,7 +15,7 @@ const addEnvironment = async () => {
       name: "name",
       message: "What is the name of the environment?",
       validate: (value) => {
-        if (currentConfig.find((config) => config.name === value)) {
+        if (currentConfig?.environments.find((config) => config.name === value)) {
           return "An environment with this name already exists!"
         }
         if (!value) {
@@ -30,7 +29,7 @@ const addEnvironment = async () => {
       name: "endpoint",
       message: "What is the endpoint of the environment?",
       validate: (value) => {
-        if (currentConfig.find((config) => config.endpoint === value)) {
+        if (currentConfig?.environments.find((config) => config.endpoint === value)) {
           return "An environment with this endpoint already exists!"
         }
         if (!value) {
@@ -44,7 +43,7 @@ const addEnvironment = async () => {
       name: "accessToken",
       message: "What is the access token of the environment?",
       validate: (value) => {
-        if (currentConfig.find((config) => config.accessToken === value)) {
+        if (currentConfig?.environments.find((config) => config.accessToken === value)) {
           return "An environment with this access token already exists!"
         }
         if (!value) {
@@ -61,7 +60,7 @@ const addEnvironment = async () => {
   fs.writeFileSync(
     migrationConfigPath,
     `const config = ${JSON.stringify(currentConfig, null, 4)}
- export default config`
+ module.exports = config`
   )
   console.log("Config updated!")
   await addEnvQuestion()
@@ -98,7 +97,7 @@ const init = async () => {
   fs.writeFileSync(
     migrationConfigPath,
     `const config = {environments: []};
-export default config`
+module.exports = config`
   )
   await addEnvQuestion()
 }
@@ -106,16 +105,19 @@ export default config`
 const getEnvironments = async (sourceName, targetName) => {
   const sourceConfig = currentConfig?.environments?.find((config) => config.name === sourceName)
   const targetConfig = currentConfig?.environments?.find((config) => config.name === targetName)
+  console.log(sourceConfig, targetConfig)
   return [sourceConfig, targetConfig]
 }
 
 ;(async () => {
   if (args?.init) {
     console.log("Initializing config...")
-    return init()
+    await init()
+    return
   } else if (args?.add) {
     console.log("Adding environment to config...")
-    return await addEnvironment()
+    await addEnvironment()
+    return
   } else if (args?.help) {
     console.log("Showing help...")
     return console.log(usage)

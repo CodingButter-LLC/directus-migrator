@@ -5,7 +5,7 @@
     "strict": true,
     "target": "es6",
     "module": "commonjs",
-    "sourceMap": false,
+    "sourceMap": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true
