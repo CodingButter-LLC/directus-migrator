@@ -50,18 +50,20 @@ npx directus-migrator -init
 example
 
 ```js
-const config = [
-  {
-    "name": "development",
-    "endpoint": "<development-url>",
-    "accessToken": "<development_admin_token>"
-  },
-  {
-    "name": "staging",
-       "endpoint": "<staging-url>",
-    "accessToken": "<staging_admin_token>"
-  }
-]
+const config = {
+  environments:[
+    {
+      "name": "development",
+      "endpoint": "<development-url>",
+      "accessToken": "<development_admin_token>"
+    },
+    {
+      "name": "staging",
+        "endpoint": "<staging-url>",
+      "accessToken": "<staging_admin_token>"
+    }
+  ]
+}
 export default config 
 ```
 
@@ -87,7 +89,7 @@ Supported options
 
 ### Options
 
-> npx directus-migrator -argument[=value]
+> npx directus-migrator -argument [value]
 
 | Name | Type | Description
 | :-: | :-: | :-: |
@@ -97,7 +99,7 @@ Supported options
 | `target` | 'string'   | Environment to migrate to
 | `roles` | 'flag' | Only migrates roles [ can be combined with permissions and schema ]
 | `permissions` | 'flag' | Only migrate permissions [ can be combined with roles and schema ]
-| `permissions` | 'flag' | display detailed console logs
+| `schema` | 'flag' | Only migrate permissions [ can be combined with roles and permissions ]
 | `help` | 'flag' | display help menu
 
 ## Authors
