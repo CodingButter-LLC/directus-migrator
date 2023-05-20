@@ -66,3 +66,4 @@ function CRUD({ environment, path, data, params, method = Method.GET, }) {
     });
 }
 exports.default = CRUD;
+//# sourceMappingURL=CRUD.js.map

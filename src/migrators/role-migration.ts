@@ -11,7 +11,10 @@ export interface RoleExecution {
   failMessage: (message: any) => string;
 }
 
-export async function migrate(
+/**
+ * Runs the Role Migration
+ */
+export async function roleMigrator(
   source: Environment,
   target: Environment
 ): Promise<AdminIds> {

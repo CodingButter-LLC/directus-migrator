@@ -2,7 +2,10 @@ import CRUD, { Method } from "../utils/CRUD";
 import logger from "../utils/Logger";
 import { Environment } from "../types/types";
 
-export async function migrate(
+/**
+ * Runs the Schema Migration
+ */
+export async function schemaMigrator(
   source: Environment,
   target: Environment,
   force?: boolean

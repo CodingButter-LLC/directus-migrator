@@ -2,7 +2,7 @@
 const prompts = require("prompts")
 const fs = require("fs")
 const path = require("path")
-const { DirectusMigrator } = require("../dist/index.js")
+const { directusMigrator } = require("../dist/index.js")
 const { args, usage } = require("./commands.config.js")
 const figlet = require("figlet")
 const migrationConfigPath = path.resolve(process.cwd(), "directus-migrator.config.js")
@@ -134,7 +134,7 @@ const getEnvironments = async (sourceName, targetName) => {
       )
 
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
-      await DirectusMigrator(sourceConfig, targetConfig, args)
+      await directusMigrator(sourceConfig, targetConfig, args)
     } else {
       console.log(
         `No environments found. Please run ${"directus-migrator --init"} to initialize the config.`

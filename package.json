@@ -6,6 +6,10 @@
   "bin": {
     "directus-migrator": "bin/cli.js"
   },
+    "repository": {
+    "type" : "git",
+    "url" : "https://github.com/codingbutter-llc/directus-migrator.git"
+  },
   "scripts": {
     "build": "npx tsc",
     "migrate:dev:prod": "node bin/index.js -f -s development - t production",
