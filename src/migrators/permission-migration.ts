@@ -146,7 +146,10 @@ async function executePermissionAction({
   return roleResponse.data;
 }
 
-export async function migrate(
+/**
+ * Runs the permission migration
+ */
+export async function permissionMigrator(
   source: Environment,
   target: Environment,
   adminIds: AdminIds

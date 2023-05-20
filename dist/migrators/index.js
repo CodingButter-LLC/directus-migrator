@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PermissionMigrator = exports.RoleMigrator = exports.SchemaMigrator = void 0;
+exports.permissionMigrator = exports.roleMigrator = exports.schemaMigrator = void 0;
 var schema_migration_1 = require("./schema-migration");
-Object.defineProperty(exports, "SchemaMigrator", { enumerable: true, get: function () { return schema_migration_1.migrate; } });
+Object.defineProperty(exports, "schemaMigrator", { enumerable: true, get: function () { return schema_migration_1.schemaMigrator; } });
 var role_migration_1 = require("./role-migration");
-Object.defineProperty(exports, "RoleMigrator", { enumerable: true, get: function () { return role_migration_1.migrate; } });
+Object.defineProperty(exports, "roleMigrator", { enumerable: true, get: function () { return role_migration_1.roleMigrator; } });
 var permission_migration_1 = require("./permission-migration");
-Object.defineProperty(exports, "PermissionMigrator", { enumerable: true, get: function () { return permission_migration_1.migrate; } });
+Object.defineProperty(exports, "permissionMigrator", { enumerable: true, get: function () { return permission_migration_1.permissionMigrator; } });
+//# sourceMappingURL=index.js.map

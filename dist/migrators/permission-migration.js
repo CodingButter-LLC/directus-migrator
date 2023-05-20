@@ -46,7 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.migrate = void 0;
+exports.permissionMigrator = void 0;
 const CRUD_1 = __importStar(require("../utils/CRUD"));
 const Compare_1 = require("../utils/Compare");
 const Logger_js_1 = __importDefault(require("../utils/Logger.js"));
@@ -139,7 +139,10 @@ function executePermissionAction({ method, environment, permissions, id, success
         return roleResponse.data;
     });
 }
-function migrate(source, target, adminIds) {
+/**
+ * Runs the permission migration
+ */
+function permissionMigrator(source, target, adminIds) {
     return __awaiter(this, void 0, void 0, function* () {
         Logger_js_1.default.info("Migrating Permissions");
         const targetPermissions = filterAndMutatePermissions(yield getPermissions(target), adminIds.targetAdminId);
@@ -186,4 +189,5 @@ function migrate(source, target, adminIds) {
         Logger_js_1.default.info("Migrating Permissions Complete");
     });
 }
-exports.migrate = migrate;
+exports.permissionMigrator = permissionMigrator;
+//# sourceMappingURL=permission-migration.js.map

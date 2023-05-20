@@ -35,10 +35,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applyDiff = exports.getDiff = exports.getSnapshot = exports.migrate = void 0;
+exports.applyDiff = exports.getDiff = exports.getSnapshot = exports.schemaMigrator = void 0;
 const CRUD_1 = __importStar(require("../utils/CRUD"));
 const Logger_1 = __importDefault(require("../utils/Logger"));
-function migrate(source, target, force) {
+/**
+ * Runs the Schema Migration
+ */
+function schemaMigrator(source, target, force) {
     return __awaiter(this, void 0, void 0, function* () {
         Logger_1.default.info("Migrating Schema Started");
         const snapshot = yield getSnapshot(source);
@@ -60,7 +63,7 @@ function migrate(source, target, force) {
         return;
     });
 }
-exports.migrate = migrate;
+exports.schemaMigrator = schemaMigrator;
 function getSnapshot(environment) {
     return __awaiter(this, void 0, void 0, function* () {
         const snapShot = yield (0, CRUD_1.default)({
@@ -98,3 +101,4 @@ function applyDiff(environment, diff) {
     });
 }
 exports.applyDiff = applyDiff;
+//# sourceMappingURL=schema-migration.js.map

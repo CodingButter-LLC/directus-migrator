@@ -1,8 +1,11 @@
 import { AdminIds, Environment, DirectusMigratorCommand } from "./types/types";
-import { SchemaMigrator, PermissionMigrator, RoleMigrator } from "./migrators";
+import { schemaMigrator, permissionMigrator, roleMigrator } from "./migrators";
 import logger from "./utils/Logger";
 
-export async function DirectusMigrator(
+/**
+ *  Runs the Directus Migration
+ */
+export async function directusMigrator(
   source: Environment,
   target: Environment,
   args: DirectusMigratorCommand
@@ -14,16 +17,16 @@ export async function DirectusMigrator(
   }
   if (roles || permissions || schema) {
     if (schema) {
-      return await SchemaMigrator(source, target, force);
+      return await schemaMigrator(source, target, force);
     }
-    const adminIds = await RoleMigrator(source, target);
+    const adminIds = await roleMigrator(source, target);
     if (permissions) {
-      await PermissionMigrator(source, target, adminIds);
+      await permissionMigrator(source, target, adminIds);
     }
   } else {
-    await SchemaMigrator(source, target, force);
-    const adminIds = await RoleMigrator(source, target);
-    await PermissionMigrator(source, target, adminIds);
+    await schemaMigrator(source, target, force);
+    const adminIds = await roleMigrator(source, target);
+    await permissionMigrator(source, target, adminIds);
   }
 
   logger.info("Migration Completed!");

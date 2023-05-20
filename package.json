@@ -1,10 +1,14 @@
 {
   "name": "directus-migrator",
-  "version": "1.4.19",
+  "version": "1.4.20",
   "description": "",
   "main": "dist/index.js",
   "bin": {
     "directus-migrator": "bin/cli.js"
+  },
+    "repository": {
+    "type" : "git",
+    "url" : "https://github.com/codingbutter-llc/directus-migrator.git"
   },
   "scripts": {
     "build": "npx tsc",

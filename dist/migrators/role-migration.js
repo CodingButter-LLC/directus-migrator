@@ -35,10 +35,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRoleCategories = exports.getRoles = exports.removeAdmin = exports.migrate = void 0;
+exports.getRoleCategories = exports.getRoles = exports.removeAdmin = exports.roleMigrator = void 0;
 const CRUD_1 = __importStar(require("../utils/CRUD"));
 const Logger_1 = __importDefault(require("../utils/Logger"));
-function migrate(source, target) {
+/**
+ * Runs the Role Migration
+ */
+function roleMigrator(source, target) {
     return __awaiter(this, void 0, void 0, function* () {
         Logger_1.default.info("Migrating Roles");
         const { createdRoles, deletedRoles, adminIds } = yield getRoleCategories(source, target);
@@ -68,7 +71,7 @@ function migrate(source, target) {
         return adminIds;
     });
 }
-exports.migrate = migrate;
+exports.roleMigrator = roleMigrator;
 function removeAdmin(roles) {
     var _a;
     const adminId = ((_a = roles.find((role) => role.name === "Administrator")) === null || _a === void 0 ? void 0 : _a.id) || "";
@@ -120,3 +123,4 @@ function executeRoleAction({ method, environment, roles, id, successMessage, fai
         return roleResponse.data;
     });
 }
+//# sourceMappingURL=role-migration.js.map

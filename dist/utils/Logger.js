@@ -81,3 +81,4 @@ class LogConfig {
 exports.LogConfig = LogConfig;
 const logger = new LogConfig().logger;
 exports.default = logger;
+//# sourceMappingURL=Logger.js.map
