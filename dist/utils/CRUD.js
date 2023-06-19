@@ -21,7 +21,7 @@ var Method;
     Method["PATCH"] = "PATCH";
     Method["PUT"] = "PATCH";
     Method["DELETE"] = "DELETE";
-})(Method = exports.Method || (exports.Method = {}));
+})(Method || (exports.Method = Method = {}));
 const headers = {
     "Content-Type": "application/json",
 };
