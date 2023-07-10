@@ -64,8 +64,8 @@ const config = {
     },
     {
       "name": "production",
-      "endpoint": "<staging-url>",
-      "accessToken": "<staging_admin_token>",
+      "endpoint": "<production-url>",
+      "accessToken": "<production_admin_token>",
       "production":true
     },
   ]
