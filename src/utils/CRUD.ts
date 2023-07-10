@@ -1,3 +1,4 @@
+import { url } from "inspector"
 import { Environment } from "../types/types"
 import logger from "../utils/Logger"
 
@@ -19,18 +20,23 @@ export interface CRUDInterface {
   handleResponse?: (response: Response) => Promise<any>
   params?: any
   method: Method
+  ignoreErrors?: boolean
 }
 
 const URL = (environment: Environment, path: string, params: any) => {
-  if (params)
-    params = `&${Object.keys(params)
-      .map((key) => `${key}=${params[key]}`)
-      .join("&")}`
-
-  const url = `${environment.endpoint}/${path}?access_token=${environment.accessToken}${
-    params ? params : ""
-  }`
-  return url
+  params = params || {}
+  let urlSearchParams = `access_token=${environment.accessToken}&`;
+  Object.keys(params).forEach((key) => {
+    if (Array.isArray(params[key])) {
+      urlSearchParams += params[key].reduce((acc: string, value: string) => {
+        return acc + `${key}[]=${value}&`
+      }, "")
+    } else {
+      urlSearchParams += `${key}=${params[key]}&`
+    }
+  })
+  urlSearchParams = urlSearchParams.slice(0, -1)
+  return `${environment.endpoint}/${path}?${urlSearchParams}`
 }
 
 export function logErrors(errors: any[], url: string) {
@@ -38,7 +44,6 @@ export function logErrors(errors: any[], url: string) {
   errors.forEach((error) => {
     logger.error(error)
   })
-  process.exit()
 }
 
 export default async function CRUD({
@@ -47,6 +52,7 @@ export default async function CRUD({
   data,
   params,
   method = Method.GET,
+  ignoreErrors = false
 }: CRUDInterface): Promise<any> {
   const url = URL(environment, path, params)
   logger.debug(JSON.stringify({ url, method, data }))
@@ -56,7 +62,9 @@ export default async function CRUD({
     body: data && JSON.stringify(data),
   })
   //check if response status is empty
-  if (response.status === 204) return false
+  if (response.status === 204) {
+    return false
+  }
   try {
     const json = await response.json()
     if (json.errors) {

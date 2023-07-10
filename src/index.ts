@@ -1,5 +1,5 @@
 import { AdminIds, Environment, DirectusMigratorCommand } from "./types/types";
-import { schemaMigrator, permissionMigrator, roleMigrator } from "./migrators";
+import { schemaMigrator, permissionMigrator, roleMigrator, flowsMigrator } from "./migrators";
 import logger from "./utils/Logger";
 
 /**
@@ -10,19 +10,23 @@ export async function directusMigrator(
   target: Environment,
   args: DirectusMigratorCommand
 ) {
-  const { force = false, roles, permissions, schema } = args;
+  const { force = false, roles, permissions, flows, schema } = args;
   if (!source || !target) {
     logger.error("Source and Target Environments are required");
     return;
   }
-  if (roles || permissions || schema) {
+  if (roles || permissions || schema || flows) {
     if (schema) {
       return await schemaMigrator(source, target, force);
     }
-    const adminIds = await roleMigrator(source, target);
+    if (flows) {
+      await flowsMigrator(source, target);
+    }
     if (permissions) {
+      const adminIds = await roleMigrator(source, target);
       await permissionMigrator(source, target, adminIds);
     }
+
   } else {
     await schemaMigrator(source, target, force);
     const adminIds = await roleMigrator(source, target);

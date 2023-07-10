@@ -26,22 +26,29 @@ const headers = {
     "Content-Type": "application/json",
 };
 const URL = (environment, path, params) => {
-    if (params)
-        params = `&${Object.keys(params)
-            .map((key) => `${key}=${params[key]}`)
-            .join("&")}`;
-    const url = `${environment.endpoint}/${path}?access_token=${environment.accessToken}${params ? params : ""}`;
-    return url;
+    params = params || {};
+    let urlSearchParams = `access_token=${environment.accessToken}&`;
+    Object.keys(params).forEach((key) => {
+        if (Array.isArray(params[key])) {
+            urlSearchParams += params[key].reduce((acc, value) => {
+                return acc + `${key}[]=${value}&`;
+            }, "");
+        }
+        else {
+            urlSearchParams += `${key}=${params[key]}&`;
+        }
+    });
+    urlSearchParams = urlSearchParams.slice(0, -1);
+    return `${environment.endpoint}/${path}?${urlSearchParams}`;
 };
 function logErrors(errors, url) {
     Logger_1.default.error(`Error in ${url}`);
     errors.forEach((error) => {
         Logger_1.default.error(error);
     });
-    process.exit();
 }
 exports.logErrors = logErrors;
-function CRUD({ environment, path, data, params, method = Method.GET, }) {
+function CRUD({ environment, path, data, params, method = Method.GET, ignoreErrors = false }) {
     return __awaiter(this, void 0, void 0, function* () {
         const url = URL(environment, path, params);
         Logger_1.default.debug(JSON.stringify({ url, method, data }));
@@ -51,8 +58,9 @@ function CRUD({ environment, path, data, params, method = Method.GET, }) {
             body: data && JSON.stringify(data),
         });
         //check if response status is empty
-        if (response.status === 204)
+        if (response.status === 204) {
             return false;
+        }
         try {
             const json = yield response.json();
             if (json.errors) {

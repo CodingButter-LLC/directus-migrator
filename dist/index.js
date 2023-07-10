@@ -20,17 +20,20 @@ const Logger_1 = __importDefault(require("./utils/Logger"));
  */
 function directusMigrator(source, target, args) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { force = false, roles, permissions, schema } = args;
+        const { force = false, roles, permissions, flows, schema } = args;
         if (!source || !target) {
             Logger_1.default.error("Source and Target Environments are required");
             return;
         }
-        if (roles || permissions || schema) {
+        if (roles || permissions || schema || flows) {
             if (schema) {
                 return yield (0, migrators_1.schemaMigrator)(source, target, force);
             }
-            const adminIds = yield (0, migrators_1.roleMigrator)(source, target);
+            if (flows) {
+                yield (0, migrators_1.flowsMigrator)(source, target);
+            }
             if (permissions) {
+                const adminIds = yield (0, migrators_1.roleMigrator)(source, target);
                 yield (0, migrators_1.permissionMigrator)(source, target, adminIds);
             }
         }

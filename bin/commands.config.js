@@ -67,6 +67,13 @@ const optionDefinitions = [
     alias: "c",
     description: "Migrate schema only",
     optional: true,
+  },
+  {
+    name: "flows",
+    type: Boolean,
+    alias: "l",
+    description: "Migrate flows only",
+    optional: true,
   }
 ]
 

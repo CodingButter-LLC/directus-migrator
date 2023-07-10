@@ -1,40 +1,41 @@
 {
-  "name": "directus-migrator",
-  "version": "1.4.23",
-  "description": "",
-  "main": "dist/index.js",
-  "bin": {
-    "directus-migrator": "bin/cli.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/codingbutter-llc/directus-migrator.git"
-  },
-  "scripts": {
-    "build": "npx tsc",
-    "migrate:dev:prod": "node bin/index.js -f -s development - t production",
-    "migrate:dev:staging": "node bin/index.js -f -s development -t staging",
-    "migrate:staging:prod": "node bin/index.js -f -s staging -t production",
-    "mds": "node bin/index.js -f -s development -t staging",
-    "mdp": "node bin/index.js -f -s development -t production",
-    "mps": "node bin/index.js -f -s production -t staging",
-    "msp": "node bin/index.js -f -s staging -t production"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "args-parser": "^1.3.0",
-    "command-line-args": "^5.2.1",
-    "command-line-usage": "^7.0.1",
-    "figlet": "^1.6.0",
-    "prompts": "^2.4.2",
-    "winston": "^3.8.2"
-  },
-  "devDependencies": {
-    "@types/figlet": "^1.5.5",
-    "@types/node": "^18.15.11",
-    "logform": "^2.5.1",
-    "typescript": "^5.0.4"
-  }
+    "name": "directus-migrator",
+    "version": "1.4.23",
+    "description": "",
+    "main": "dist/index.js",
+    "bin": {
+        "directus-migrator": "bin/cli.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/codingbutter-llc/directus-migrator.git"
+    },
+    "scripts": {
+        "build": "npx tsc",
+        "watch": "npx tsc -w",
+        "migrate:dev:prod": "node bin/index.js -f -s development - t production",
+        "migrate:dev:staging": "node bin/index.js -f -s development -t staging",
+        "migrate:staging:prod": "node bin/index.js -f -s staging -t production",
+        "mds": "node bin/index.js -f -s development -t staging",
+        "mdp": "node bin/index.js -f -s development -t production",
+        "mps": "node bin/index.js -f -s production -t staging",
+        "msp": "node bin/index.js -f -s staging -t production"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "args-parser": "^1.3.0",
+        "command-line-args": "^5.2.1",
+        "command-line-usage": "^7.0.1",
+        "figlet": "^1.6.0",
+        "prompts": "^2.4.2",
+        "winston": "^3.8.2"
+    },
+    "devDependencies": {
+        "@types/figlet": "^1.5.5",
+        "@types/node": "^18.15.11",
+        "logform": "^2.5.1",
+        "typescript": "^5.0.4"
+    }
 }

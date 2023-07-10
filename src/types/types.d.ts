@@ -66,4 +66,5 @@ export type DirectusMigratorCommand = {
   permissions?: boolean;
   schema?: boolean;
   help?: boolean;
+  flows?: boolean;
 };

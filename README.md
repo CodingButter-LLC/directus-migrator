@@ -98,9 +98,10 @@ when adding boolean flags make sure to use ```--fullFlagName``` or
 | :-: | :-: | :-: | :-:
 | `init`        | boolean | ```--init or -i```        | Initialize config file
 | `force`       | boolean | ```--force or -f```       | Force migration between directus versions
-| `roles`       | boolean | ```--roles or -r```       | Only migrates roles [ can be combined with permissions and schema ]
-| `permissions` | boolean | ```--permissions or -p``` | Only migrate permissions [ can be combined with roles and schema ]
-| `schema`      | boolean | ```--schema or -c```      | Only migrate permissions [ can be combined with roles and permissions ]
+| `roles`       | boolean | ```--roles or -r```       | Only migrates roles [ can be combined with permissions,schema,flows ]
+| `permissions` | boolean | ```--permissions or -p``` | Only migrate permissions [ can be combined with roles,schema,flows ]
+| `schema`      | boolean | ```--schema or -c```      | Only migrate permissions [ can be combined with roles,permissions,flows ]
+| `flows`       | boolean | ```--flows or -l``` | Only migrate flows [ can be combined with rols,permissions,schema]
 | `help`        | boolean | ```--help or -h```        | Display help menu
 | `source`      | string  | ```--source envname or -s envname``` | Environment to migrate from
 | `target`      | string  | ```--target envname or -t envname``` | Environment to migrate to

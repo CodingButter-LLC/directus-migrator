@@ -20,16 +20,16 @@ export async function schemaMigrator(
   const diff = await getDiff(target, snapshot, force);
   if (!diff) {
     logger.warn("No Schema Diff Found");
-    return;
+    return true
   }
   const applied = await applyDiff(target, diff);
   if (!applied) {
-    logger.error("Schema Migration Failed");
-    return;
+    logger.error("Schema Migration Failed - Failed to apply");
+    return false
   }
 
   logger.info("Schema Migration Successful");
-  return;
+  return true
 }
 
 export async function getSnapshot(environment: Environment) {
