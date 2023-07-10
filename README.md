@@ -106,7 +106,7 @@ when adding boolean flags make sure to use ```--fullFlagName``` or ```-alias``` 
 | `roles`       | boolean | ```--roles or -r```       | Only migrates roles [ can be combined with permissions,schema,flows ]
 | `permissions` | boolean | ```--permissions or -p``` | Only migrate permissions [ can be combined with roles,schema,flows ]
 | `schema`      | boolean | ```--schema or -c```      | Only migrate schema [ can be combined with roles,permissions,flows ]
-| `flows`       | boolean | ```--flows or -l``` | Only migrate flows [ can be combined with rols,permissions,schema]
+| `flows`       | boolean | ```--flows or -l```       | Only migrate flows [ can be combined with roles,permissions,schema ]
 | `help`        | boolean | ```--help or -h```        | Display help menu
 | `source`      | string  | ```--source envname or -s envname``` | Environment to migrate from
 | `target`      | string  | ```--target envname or -t envname``` | Environment to migrate to
