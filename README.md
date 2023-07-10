@@ -42,7 +42,7 @@ No installation neccessary. just run the following command from within the proje
 npx directus-migrator --init
 ```
 
-![cli-init](https://user-images.githubusercontent.com/10267569/233826675-6936664f-e11f-49a3-8c1f-2391e83e6d1b.jpg)
+![cli-init](https://github.com/CodingButter-LLC/directus-migrator/raw/main/images/cli-init.jpg)
 
 
 ### directus-migrator.config.js
@@ -59,7 +59,7 @@ const config = {
     },
     {
       "name": "staging",
-        "endpoint": "<staging-url>",
+      "endpoint": "<staging-url>",
       "accessToken": "<staging_admin_token>"
     }
   ]
