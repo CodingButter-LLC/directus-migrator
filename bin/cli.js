@@ -105,7 +105,6 @@ module.exports = config`
 const getEnvironments = async (sourceName, targetName) => {
   const sourceConfig = currentConfig?.environments?.find((config) => config.name === sourceName)
   const targetConfig = currentConfig?.environments?.find((config) => config.name === targetName)
-  console.log(sourceConfig, targetConfig)
   return [sourceConfig, targetConfig]
 }
 
