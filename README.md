@@ -91,8 +91,7 @@ Supported options
 
 > npx directus-migrator --argument [value]
 
-when adding boolean flags make sure to use ```--fullFlagName``` or 
-```-alias```  (eg. --init or -i)
+when adding boolean flags make sure to use ```--fullFlagName``` or ```-alias```  (eg. --init or -i)
 
 | Name | Type | usage | Description
 | :-: | :-: | :-: | :-:
@@ -100,7 +99,7 @@ when adding boolean flags make sure to use ```--fullFlagName``` or
 | `force`       | boolean | ```--force or -f```       | Force migration between directus versions
 | `roles`       | boolean | ```--roles or -r```       | Only migrates roles [ can be combined with permissions,schema,flows ]
 | `permissions` | boolean | ```--permissions or -p``` | Only migrate permissions [ can be combined with roles,schema,flows ]
-| `schema`      | boolean | ```--schema or -c```      | Only migrate permissions [ can be combined with roles,permissions,flows ]
+| `schema`      | boolean | ```--schema or -c```      | Only migrate schema [ can be combined with roles,permissions,flows ]
 | `flows`       | boolean | ```--flows or -l``` | Only migrate flows [ can be combined with rols,permissions,schema]
 | `help`        | boolean | ```--help or -h```        | Display help menu
 | `source`      | string  | ```--source envname or -s envname``` | Environment to migrate from

@@ -15,6 +15,7 @@ export async function directusMigrator(
     logger.error("Source and Target Environments are required");
     return;
   }
+
   if (roles || permissions || schema || flows) {
     if (schema) {
       return await schemaMigrator(source, target, force);

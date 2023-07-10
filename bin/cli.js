@@ -53,9 +53,22 @@ const addEnvironment = async () => {
       },
     },
   ])
+  const updatedConfig = { name, endpoint, accessToken }
+  if(!currentConfig?.environments.find(({production})=>production)){
+    const isProduction = await prompts({
+      type: "confirm",
+      name: "value",
+      message: "Is this a production environment?",
+      initial: false,
+    })
+    if (isProduction.value) {
+      updatedConfig.production = true
+    }
+  }
+
   currentConfig = {
     ...currentConfig,
-    environments: [...currentConfig.environments, { name, endpoint, accessToken }],
+    environments: [...currentConfig.environments, updatedConfig ],
   }
   fs.writeFileSync(
     migrationConfigPath,
@@ -99,6 +112,7 @@ const init = async () => {
     `const config = {environments: []};
 module.exports = config`
   )
+  currentConfig = {environments: []}
   await addEnvQuestion()
 }
 
@@ -133,6 +147,18 @@ const getEnvironments = async (sourceName, targetName) => {
       )
 
       const [sourceConfig, targetConfig] = await getEnvironments(args.source, args.target)
+      if (targetConfig?.production) {
+        const confirm = await prompts({
+          type: "confirm",
+          name: "value",
+          message: "You are about to migrate to a production environment. Are you sure?",
+          initial: false,
+        })
+        if (!confirm.value) {
+          console.log("Exiting...")
+          process.exit(0)
+        }
+      }
       await directusMigrator(sourceConfig, targetConfig, args)
     } else {
       console.log(
