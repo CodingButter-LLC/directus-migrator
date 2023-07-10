@@ -61,7 +61,13 @@ const config = {
       "name": "staging",
       "endpoint": "<staging-url>",
       "accessToken": "<staging_admin_token>"
-    }
+    },
+    {
+      "name": "production",
+      "endpoint": "<staging-url>",
+      "accessToken": "<staging_admin_token>",
+      "production":true
+    },
   ]
 }
 export default config 
