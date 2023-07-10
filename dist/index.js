@@ -30,7 +30,6 @@ function directusMigrator(source, target, args) {
                 return yield (0, migrators_1.schemaMigrator)(source, target, force);
             }
             if (flows) {
-                yield (0, migrators_1.flowsMigrator)(source, target);
             }
             if (permissions) {
                 const adminIds = yield (0, migrators_1.roleMigrator)(source, target);
@@ -41,6 +40,7 @@ function directusMigrator(source, target, args) {
             yield (0, migrators_1.schemaMigrator)(source, target, force);
             const adminIds = yield (0, migrators_1.roleMigrator)(source, target);
             yield (0, migrators_1.permissionMigrator)(source, target, adminIds);
+            yield (0, migrators_1.flowsMigrator)(source, target);
         }
         Logger_1.default.info("Migration Completed!");
     });
