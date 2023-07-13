@@ -67,7 +67,7 @@ export async function getRoles(environment: Environment) {
     path: "roles",
   });
   if (!roleResponse)
-    throw new Error(`Failed to retrieve Roles from ${environment.name}`);
+    logger.error(`Failed to retrieve Roles from ${environment.name}`);
   logger.info(`Retrieved Roles from ${environment.name}`);
   return roleResponse?.data;
 }

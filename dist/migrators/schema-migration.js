@@ -49,7 +49,7 @@ function schemaMigrator(source, target, force) {
             Logger_1.default.error("Schema Migration Snapshot Failed");
             return;
         }
-        const diff = yield getDiff(target, snapshot, force);
+        const { diff } = yield getDiff(target, snapshot, force);
         if (!diff) {
             Logger_1.default.warn("No Schema Diff Found");
             return true;
@@ -66,11 +66,23 @@ function schemaMigrator(source, target, force) {
 exports.schemaMigrator = schemaMigrator;
 function getSnapshot(environment) {
     return __awaiter(this, void 0, void 0, function* () {
-        const snapShot = yield (0, CRUD_1.default)({
-            method: CRUD_1.Method.GET,
-            environment,
-            path: "schema/snapshot",
-        });
+        let snapShot = {};
+        if (environment.endpoint.includes("file://")) {
+            const filePath = `${environment.endpoint.replace("file://", "")}/schema/snapshot.json`;
+            const propertyName = "schema";
+            snapShot.data = yield (0, CRUD_1.fileCRUD)({
+                method: CRUD_1.Method.GET,
+                filePath,
+                propertyName,
+            });
+        }
+        else {
+            snapShot = yield (0, CRUD_1.default)({
+                method: CRUD_1.Method.GET,
+                environment,
+                path: "schema/snapshot",
+            });
+        }
         Logger_1.default.info("Schema Migration Snapshot Successful");
         return snapShot === null || snapShot === void 0 ? void 0 : snapShot.data;
     });
@@ -78,6 +90,8 @@ function getSnapshot(environment) {
 exports.getSnapshot = getSnapshot;
 function getDiff(environment, snapshot, force) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (environment.endpoint.includes("file://"))
+            return snapshot;
         const diff = yield (0, CRUD_1.default)({
             method: CRUD_1.Method.POST,
             environment,
@@ -92,6 +106,18 @@ function getDiff(environment, snapshot, force) {
 exports.getDiff = getDiff;
 function applyDiff(environment, diff) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (environment.endpoint.includes("file://")) {
+            const filePath = `${environment.endpoint.replace("file://", "")}/schema/schema.json`;
+            const propertyName = "schema";
+            yield (0, CRUD_1.fileCRUD)({
+                method: CRUD_1.Method.POST,
+                filePath,
+                propertyName,
+                data: diff,
+            });
+            Logger_1.default.info("Schema Migration Apply Successful");
+            return true;
+        }
         return yield (0, CRUD_1.default)({
             method: CRUD_1.Method.POST,
             environment,

@@ -86,7 +86,7 @@ function getRoles(environment) {
             path: "roles",
         });
         if (!roleResponse)
-            throw new Error(`Failed to retrieve Roles from ${environment.name}`);
+            Logger_1.default.error(`Failed to retrieve Roles from ${environment.name}`);
         Logger_1.default.info(`Retrieved Roles from ${environment.name}`);
         return roleResponse === null || roleResponse === void 0 ? void 0 : roleResponse.data;
     });

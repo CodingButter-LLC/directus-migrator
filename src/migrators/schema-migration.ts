@@ -1,6 +1,7 @@
-import CRUD, { Method } from "../utils/CRUD";
+import CRUD, { fileCRUD, Method } from "../utils/CRUD";
 import logger from "../utils/Logger";
 import { Environment } from "../types/types";
+import fs from "fs";
 
 /**
  * Runs the Schema Migration
@@ -17,12 +18,14 @@ export async function schemaMigrator(
     return;
   }
 
-  const diff = await getDiff(target, snapshot, force);
+  const { diff } = await getDiff(target, snapshot, force);
   if (!diff) {
     logger.warn("No Schema Diff Found");
     return true
   }
+
   const applied = await applyDiff(target, diff);
+
   if (!applied) {
     logger.error("Schema Migration Failed - Failed to apply");
     return false
@@ -33,11 +36,22 @@ export async function schemaMigrator(
 }
 
 export async function getSnapshot(environment: Environment) {
-  const snapShot = await CRUD({
-    method: Method.GET,
-    environment,
-    path: "schema/snapshot",
-  });
+  let snapShot: any = {};
+  if (environment.endpoint.includes("file://")) {
+    const filePath = `${environment.endpoint.replace("file://", "")}/schema/snapshot.json`;
+    const propertyName = "schema";
+    snapShot.data = await fileCRUD({
+      method: Method.GET,
+      filePath,
+      propertyName,
+    })
+  } else {
+    snapShot = await CRUD({
+      method: Method.GET,
+      environment,
+      path: "schema/snapshot",
+    });
+  }
   logger.info("Schema Migration Snapshot Successful");
   return snapShot?.data;
 }
@@ -47,6 +61,7 @@ export async function getDiff(
   snapshot: any,
   force?: boolean | undefined
 ) {
+  if (environment.endpoint.includes("file://")) return snapshot
   const diff = await CRUD({
     method: Method.POST,
     environment,
@@ -59,7 +74,23 @@ export async function getDiff(
   return diff?.data || diff;
 }
 
+
+
+
 export async function applyDiff(environment: Environment, diff: any) {
+  if (environment.endpoint.includes("file://")) {
+    const filePath = `${environment.endpoint.replace("file://", "")}/schema/schema.json`;
+    const propertyName = "schema";
+    await fileCRUD({
+      method: Method.POST,
+      filePath,
+      propertyName,
+      data: diff,
+    });
+    logger.info("Schema Migration Apply Successful");
+    return true;
+  }
+
   return await CRUD({
     method: Method.POST,
     environment,
