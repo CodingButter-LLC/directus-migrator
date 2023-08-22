@@ -49,6 +49,31 @@ export type Permission = {
   fields: string[];
 };
 
+export interface Preset {
+  uid?: string;
+  id?: number;
+  bookmark: null;
+  user: string;
+  role: null;
+  collection: string;
+  search: null;
+  filters: any[];
+  layout: string;
+  layout_query: {
+    tabular: { sort: string; fields: string[]; page: number };
+  };
+  layout_options: {
+    tabular: {
+      widths: {
+        action: number;
+        collection: number;
+        timestamp: number;
+        user: number;
+      };
+    };
+  };
+}
+
 export type AdminIds = {
   sourceAdminId: string;
   targetAdminId: string;
@@ -67,4 +92,5 @@ export type DirectusMigratorCommand = {
   schema?: boolean;
   help?: boolean;
   flows?: boolean;
+  presets?: boolean;
 };

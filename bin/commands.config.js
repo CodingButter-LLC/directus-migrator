@@ -74,6 +74,13 @@ const optionDefinitions = [
     alias: "l",
     description: "Migrate flows only",
     optional: true,
+  },
+  {
+    name: "presets",
+    type: Boolean,
+    alias: "v",
+    description: "Migrate presets only",
+    optional: true,
   }
 ]
 
