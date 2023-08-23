@@ -13,14 +13,10 @@ interface PresetExecution {
 }
 
 function filterAndMutatePresets(presets: Preset[]): Preset[] {
-  return presets;
-  // const filteredPresets = presets.filter(
-  //   ({ role, id }) => role != adminId && id != null
-  // );
-  // filteredPresets.forEach((preset) => {
-  //   preset.uid = `${preset.collection}${preset.id}`;
-  // });
-  // return filteredPresets;
+  return presets.map((preset) => ({
+    ...preset,
+    uid: `${preset.id}`,
+  }));
 }
 
 /**
@@ -123,14 +119,14 @@ async function executePresetAction({
   successMessage,
   failMessage,
 }: PresetExecution) {
-  const roleResponse = await CRUD({
+  const reqResponse = await CRUD({
     method,
     environment,
     path: `presets${id ? `/${id}` : ""}`,
     data: presets,
   });
-  logger.info(successMessage(roleResponse.data));
-  return roleResponse.data;
+  logger.info(successMessage(reqResponse.data));
+  return reqResponse.data;
 }
 
 /**

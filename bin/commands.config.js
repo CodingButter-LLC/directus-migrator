@@ -1,8 +1,8 @@
-const commandLineArgs = require("command-line-args")
-const commandLineUsage = require("command-line-usage")
-const figlet = require("figlet")
+const commandLineArgs = require("command-line-args");
+const commandLineUsage = require("command-line-usage");
+const figlet = require("figlet");
 
-process.env.LOGGING_LEVEL = process.env.LOGGING_LEVL || "info"
+process.env.LOGGING_LEVEL = process.env.LOGGING_LEVL || "info";
 const optionDefinitions = [
   {
     name: "init",
@@ -81,8 +81,36 @@ const optionDefinitions = [
     alias: "v",
     description: "Migrate presets only",
     optional: true,
-  }
-]
+  },
+  {
+    name: "dashboards",
+    type: Boolean,
+    alias: "d",
+    description: "Migrate dashboards and panels only",
+    optional: true,
+  },
+  {
+    name: "translations",
+    type: Boolean,
+    alias: "g",
+    description: "Migrate translations only",
+    optional: true,
+  },
+  {
+    name: "webhooks",
+    type: Boolean,
+    alias: "w",
+    description: "Migrate webhooks only",
+    optional: true,
+  },
+  {
+    name: "settings",
+    type: Boolean,
+    alias: "o",
+    description: "Migrate settings only",
+    optional: true,
+  },
+];
 
 const usage = commandLineUsage([
   {
@@ -102,13 +130,14 @@ const usage = commandLineUsage([
   },
   {
     header: "Additional info",
-    content: "For more information, visit https://github.com/codingbutter-llc/directus-migrator",
+    content:
+      "For more information, visit https://github.com/codingbutter-llc/directus-migrator",
   },
-])
+]);
 
 const args = commandLineArgs(optionDefinitions, {
   helpArg: "help",
   partial: true,
-})
+});
 
-module.exports = { args, usage }
+module.exports = { args, usage };

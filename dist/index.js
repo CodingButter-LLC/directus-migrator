@@ -20,12 +20,20 @@ const Logger_1 = __importDefault(require("./utils/Logger"));
  */
 function directusMigrator(source, target, args) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { force = false, roles, permissions, flows, schema, presets } = args;
+        const { force = false, roles, permissions, flows, schema, presets, dashboards, translations, webhooks, settings, } = args;
         if (!source || !target) {
             Logger_1.default.error("Source and Target Environments are required");
             return;
         }
-        if (roles || permissions || schema || flows || presets) {
+        if (roles ||
+            permissions ||
+            schema ||
+            flows ||
+            presets ||
+            dashboards ||
+            translations ||
+            webhooks ||
+            settings) {
             if (schema) {
                 return yield (0, migrators_1.schemaMigrator)(source, target, force);
             }
@@ -37,6 +45,19 @@ function directusMigrator(source, target, args) {
             }
             if (presets) {
                 yield (0, migrators_1.presetMigrator)(source, target);
+            }
+            if (dashboards) {
+                yield (0, migrators_1.dashboardMigrator)(source, target);
+                yield (0, migrators_1.panelMigrator)(source, target);
+            }
+            if (translations) {
+                yield (0, migrators_1.translationMigrator)(source, target);
+            }
+            if (webhooks) {
+                yield (0, migrators_1.webhookMigrator)(source, target);
+            }
+            if (settings) {
+                yield (0, migrators_1.settingMigrator)(source, target);
             }
         }
         else {

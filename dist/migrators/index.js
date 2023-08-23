@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.presetMigrator = exports.flowsMigrator = exports.permissionMigrator = exports.roleMigrator = exports.schemaMigrator = void 0;
+exports.settingMigrator = exports.webhookMigrator = exports.translationMigrator = exports.panelMigrator = exports.dashboardMigrator = exports.presetMigrator = exports.flowsMigrator = exports.permissionMigrator = exports.roleMigrator = exports.schemaMigrator = void 0;
 var schema_migration_1 = require("./schema-migration");
 Object.defineProperty(exports, "schemaMigrator", { enumerable: true, get: function () { return schema_migration_1.schemaMigrator; } });
 var role_migration_1 = require("./role-migration");
@@ -11,4 +11,14 @@ var flows_migration_1 = require("./flows-migration");
 Object.defineProperty(exports, "flowsMigrator", { enumerable: true, get: function () { return flows_migration_1.flowsMigrator; } });
 var presets_migration_1 = require("./presets-migration");
 Object.defineProperty(exports, "presetMigrator", { enumerable: true, get: function () { return presets_migration_1.presetMigrator; } });
+var dashboards_migration_1 = require("./dashboards-migration");
+Object.defineProperty(exports, "dashboardMigrator", { enumerable: true, get: function () { return dashboards_migration_1.dashboardMigrator; } });
+var panels_migration_1 = require("./panels-migration");
+Object.defineProperty(exports, "panelMigrator", { enumerable: true, get: function () { return panels_migration_1.panelMigrator; } });
+var translations_migration_1 = require("./translations-migration");
+Object.defineProperty(exports, "translationMigrator", { enumerable: true, get: function () { return translations_migration_1.translationMigrator; } });
+var webhooks_migration_1 = require("./webhooks-migration");
+Object.defineProperty(exports, "webhookMigrator", { enumerable: true, get: function () { return webhooks_migration_1.webhookMigrator; } });
+var settings_migration_1 = require("./settings-migration");
+Object.defineProperty(exports, "settingMigrator", { enumerable: true, get: function () { return settings_migration_1.settingMigrator; } });
 //# sourceMappingURL=index.js.map

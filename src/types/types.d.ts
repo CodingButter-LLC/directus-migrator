@@ -74,6 +74,101 @@ export interface Preset {
   };
 }
 
+export interface Dashboard {
+  uid?: string;
+  id?: string;
+  name: string;
+  icon: string;
+  note: string;
+  date_created: string;
+  user_created: string;
+  color: string;
+  panels: string[];
+}
+
+export interface Panel {
+  uid?: string;
+  id?: string;
+  dashboard: string;
+  name: string;
+  icon: string;
+  color: string;
+  show_header: boolean;
+  note: string;
+  type: string;
+  position_x: number;
+  position_y: number;
+  width: number;
+  height: number;
+  options: Options;
+  date_created: string;
+  user_created: string;
+}
+export interface Translation {
+  uid?: string;
+  id?: string;
+  key: string;
+  language: string;
+  value: string;
+}
+
+export interface Translation {
+  uid?: string;
+  id?: string;
+  key: string;
+  language: string;
+  value: string;
+}
+export interface Webhook {
+  uid?: string;
+  id?: number;
+  name: string;
+  method: string;
+  url: string;
+  status: string;
+  data: boolean;
+  actions: string[];
+  collections: string[];
+}
+export interface Setting {
+  uid?: string;
+  id?: number;
+  project_name: string;
+  project_descriptor: string;
+  project_url: string | null;
+  project_color: string | null;
+  project_logo: string | null;
+  public_foreground: string | null;
+  public_background: string | null;
+  public_note: string | null;
+  auth_login_attempts: number;
+  auth_password_policy: string | null;
+  storage_asset_transform: string;
+  storage_asset_presets: [
+    {
+      key: string;
+      fit: string;
+      width: number;
+      height: number;
+      quality: number;
+      withoutEnlargement: boolean;
+    }
+  ];
+  custom_css: string | null;
+  storage_default_folder: string | null;
+  basemaps: string | null;
+  mapbox_key: string | null;
+  module_bar: string | null;
+  custom_aspect_ratios: [
+    {
+      text: string;
+      value: number;
+    }
+  ];
+}
+
+export interface Options {}
+
 export type AdminIds = {
   sourceAdminId: string;
   targetAdminId: string;
@@ -93,4 +188,8 @@ export type DirectusMigratorCommand = {
   help?: boolean;
   flows?: boolean;
   presets?: boolean;
+  dashboards?: boolean;
+  translations?: boolean;
+  webhooks?: boolean;
+  settings?: boolean;
 };

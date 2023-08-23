@@ -51,7 +51,14 @@ const CRUD_1 = __importStar(require("../utils/CRUD"));
 const Compare_1 = require("../utils/Compare");
 const Logger_js_1 = __importDefault(require("../utils/Logger.js"));
 function filterAndMutatePresets(presets) {
-    return presets.map((preset) => (Object.assign(Object.assign({}, preset), { uid: `${preset.id}` })));
+    return presets;
+    // const filteredPresets = presets.filter(
+    //   ({ role, id }) => role != adminId && id != null
+    // );
+    // filteredPresets.forEach((preset) => {
+    //   preset.uid = `${preset.collection}${preset.id}`;
+    // });
+    // return filteredPresets;
 }
 /**
  *
@@ -187,4 +194,4 @@ function presetMigrator(source, target) {
     });
 }
 exports.presetMigrator = presetMigrator;
-//# sourceMappingURL=presets-migration.js.map
+//# sourceMappingURL=presets-migration%20copy.js.map
