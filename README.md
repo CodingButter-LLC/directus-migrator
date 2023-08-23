@@ -107,6 +107,11 @@ when adding boolean flags make sure to use ```--fullFlagName``` or ```-alias``` 
 | `permissions` | boolean | ```--permissions or -p``` | Only migrate permissions [ can be combined with roles,schema,flows ]
 | `schema`      | boolean | ```--schema or -c```      | Only migrate schema [ can be combined with roles,permissions,flows ]
 | `flows`       | boolean | ```--flows or -l```       | Only migrate flows [ can be combined with roles,permissions,schema ]
+| `presets`     | boolean | ```--presets or -v```     | Only migrate presets [ can be combined other aliases ]
+| `dashboards`  | boolean | ```--dashboards or -d```  | Only migrate dashboards and panels [ can be combined other aliases ]
+| `translations`| boolean | ```--translations or -g```| Only migrate translations [ can be combined other aliases ]
+| `webhooks`    | boolean | ```--webhooks or -w```    | Only migrate webhooks [ can be combined other aliases ]
+| `settings`    | boolean | ```--settings or -o```    | Only migrate settings [ can be combined other aliases ]
 | `help`        | boolean | ```--help or -h```        | Display help menu
 | `source`      | string  | ```--source envname or -s envname``` | Environment to migrate from
 | `target`      | string  | ```--target envname or -t envname``` | Environment to migrate to

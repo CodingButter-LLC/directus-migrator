@@ -1,4 +1,10 @@
-export { schemaMigrator } from "./schema-migration"
-export { roleMigrator } from "./role-migration"
-export { permissionMigrator } from "./permission-migration"
-export { flowsMigrator } from "./flows-migration"
+export { schemaMigrator } from "./schema-migration";
+export { roleMigrator } from "./role-migration";
+export { permissionMigrator } from "./permission-migration";
+export { flowsMigrator } from "./flows-migration";
+export { presetMigrator } from "./presets-migration";
+export { dashboardMigrator } from "./dashboards-migration";
+export { panelMigrator } from "./panels-migration";
+export { translationMigrator } from "./translations-migration";
+export { webhookMigrator } from "./webhooks-migration";
+export { settingMigrator } from "./settings-migration";
