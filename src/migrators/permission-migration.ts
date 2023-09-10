@@ -1,4 +1,4 @@
-import { AdminIds, Environment, Permission, Role } from "../types/types";
+import { AdminIds, Environment, Permission, Role } from "../types";
 import CRUD, { Method } from "../utils/CRUD";
 import { DeepCompareJson } from "../utils/Compare";
 import logger from "../utils/Logger.js";
@@ -7,11 +7,11 @@ interface PermissionExecution {
   method: Method;
   environment: Environment;
   permissions?:
-    | Partial<Permission[]>
-    | Partial<Permission>
-    | number[]
-    | number
-    | undefined;
+  | Partial<Permission[]>
+  | Partial<Permission>
+  | number[]
+  | number
+  | undefined;
   id?: number | undefined;
   successMessage: (message: any) => string;
   failMessage: (message: any) => string;

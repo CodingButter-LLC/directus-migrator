@@ -1,26 +1,24 @@
 import { createLogger, format, transports, Logger, transport } from "winston"
 import { TimestampOptions } from "logform"
 import { hostname } from "os"
-import exec from "child_process"
+import { execSync } from "child_process"
 
 const { printf, combine, timestamp, label, colorize } = format
 
 let deviceLabel: string | undefined = process.env.DEVICE_LABEL || process.env.NODE_ENV
 
 try {
-  const ghEmail: string | undefined = exec
-    .execSync("git config --global user.email")
+  const ghEmail: string | undefined = execSync("git config --global user.email")
     ?.toString()
     ?.trim()
-  const ghUser: string | undefined = exec
-    .execSync("git config --global user.name")
+  const ghUser: string | undefined = execSync("git config --global user.name")
     ?.toString()
     ?.trim()
   deviceLabel = ghEmail?.includes("@")
     ? `git:${ghEmail}`
     : ghUser.length
-    ? `git:${ghUser}`
-    : hostname() || deviceLabel
+      ? `git:${ghUser}`
+      : hostname() || deviceLabel
 } catch (e) {
   // do nothing
 }

@@ -1,25 +1,15 @@
 {
     "name": "directus-migrator",
-    "version": "1.4.32",
+    "version": "1.4.42",
     "description": "",
     "main": "dist/index.js",
-    "bin": {
-        "directus-migrator": "bin/cli.js"
-    },
     "repository": {
         "type": "git",
         "url": "https://github.com/codingbutter-llc/directus-migrator.git"
     },
     "scripts": {
-        "build": "npx tsc",
-        "watch": "npx tsc -w",
-        "migrate:dev:prod": "node bin/index.js -f -s development - t production",
-        "migrate:dev:staging": "node bin/index.js -f -s development -t staging",
-        "migrate:staging:prod": "node bin/index.js -f -s staging -t production",
-        "mds": "node bin/index.js -f -s development -t staging",
-        "mdp": "node bin/index.js -f -s development -t production",
-        "mps": "node bin/index.js -f -s production -t staging",
-        "msp": "node bin/index.js -f -s staging -t production"
+        "build": "rimraf dist/lib && tsc --build tsconfig.es6.json && tsc --build tsconfig.es5.json",
+        "watch": "npx tsc -w"
     },
     "keywords": [],
     "author": "",
@@ -36,6 +26,7 @@
         "@types/figlet": "^1.5.5",
         "@types/node": "^18.15.11",
         "logform": "^2.5.1",
-        "typescript": "^5.0.4"
+        "typescript": "^5.2.2",
+        "rimraf": "^5.0.1"
     }
 }

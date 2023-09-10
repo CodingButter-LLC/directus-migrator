@@ -1,4 +1,4 @@
-import { Environment, Role, AdminIds } from "../types/types";
+import { Environment, Role, AdminIds } from "../types";
 import CRUD, { Method } from "../utils/CRUD";
 import logger from "../utils/Logger";
 

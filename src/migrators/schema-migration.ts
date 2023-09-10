@@ -1,7 +1,6 @@
 import CRUD, { fileCRUD, Method } from "../utils/CRUD";
 import logger from "../utils/Logger";
-import { Environment } from "../types/types";
-import fs from "fs";
+import { Environment } from "../types";
 
 /**
  * Runs the Schema Migration
@@ -61,7 +60,7 @@ export async function getDiff(
   snapshot: any,
   force?: boolean | undefined
 ) {
-  if (environment.endpoint.includes("file://")) return snapshot
+  if (environment.endpoint.includes("file://")) return { diff: snapshot }
   const diff = await CRUD({
     method: Method.POST,
     environment,
@@ -71,7 +70,7 @@ export async function getDiff(
   });
 
   logger.info("Schema Migration Diff Successful");
-  return diff?.data || diff;
+  return diff?.data || { diff };
 }
 
 

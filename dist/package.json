@@ -1,0 +1,40 @@
+{
+    "name": "directus-migrator",
+    "version": "1.0.0",
+    "description": "A cli and node module for migrating data from one directus instance to another",
+    "main": "lib/es5/index.js",
+    "module": "lib/es6/index.js",
+    "types": "lib/es6/index.d.ts",
+    "sideEffects": false,
+    "bin": {
+        "directus-migrator": "bin/cli.js"
+    },
+    "scripts": {
+        "release": "release-it"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/codingbutter-llc/directus-migrator.git"
+    },
+    "files": [
+        "lib",
+        "CHANGELOG.md",
+        "LICENSE",
+        "package.json",
+        "README.md"
+    ],
+    "keywords": [
+        "directus",
+        "migrate",
+        "migrator",
+        "cli",
+        "node",
+        "module"
+    ],
+    "author": "CodingButter",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/codingbutter-llc/directus-migrator/issues"
+    },
+    "homepage": "https://github.com/codingbutter-llc/directus-migrator#readme"
+}

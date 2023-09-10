@@ -1,7 +1,7 @@
 import { url } from "inspector"
-import { Environment } from "../types/types"
+import { Environment } from "../types"
 import logger from "../utils/Logger"
-import fs from "fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
 export enum Method {
@@ -97,13 +97,13 @@ export async function fileCRUD({
   method = Method.GET }: FileCRUDInterface): Promise<any> {
   const directoryPath = resolve(__dirname, filePath.split("/").slice(0, -1).join("/"))
   const file = resolve(__dirname, filePath)
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true })
-    if (!fs.existsSync(file)) {
-      fs.writeFileSync(file, "{}")
+  if (!existsSync(directoryPath)) {
+    mkdirSync(directoryPath, { recursive: true })
+    if (!existsSync(file)) {
+      writeFileSync(file, "{}")
     }
   }
-  const jsonData = JSON.parse(fs.readFileSync(file, "utf8"))
+  const jsonData = JSON.parse(readFileSync(file, "utf8"))
   if (method === Method.GET) {
     if (id) {
       return jsonData[propertyName].find((item: any) => item.id === id)
@@ -128,7 +128,7 @@ export async function fileCRUD({
     delete jsonData[propertyName]
     return jsonData
   }
-  fs.writeFileSync(file, JSON.stringify(jsonData))
+  writeFileSync(file, JSON.stringify(jsonData))
   return jsonData
 }
 

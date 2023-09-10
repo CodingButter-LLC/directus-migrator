@@ -1,4 +1,4 @@
-import { Environment } from "../types/types";
+import { Environment } from "../types";
 import CRUD, { Method } from "../utils/CRUD";
 import logger from "../utils/Logger";
 type Flow = {

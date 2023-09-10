@@ -1,4 +1,4 @@
-import { Environment, DirectusMigratorCommand } from "./types/types";
+import { Environment, DirectusMigratorCommand } from "./types";
 import { schemaMigrator, permissionMigrator, roleMigrator, flowsMigrator } from "./migrators";
 import logger from "./utils/Logger";
 
